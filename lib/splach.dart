@@ -17,7 +17,7 @@ class _SplachState extends State<Splach> {
     Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const NevBar()),
+        MaterialPageRoute(builder: (context) => const NavBarPage()),
       );
     });
   }

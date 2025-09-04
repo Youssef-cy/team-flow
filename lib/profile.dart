@@ -25,10 +25,10 @@ class _ProfileState extends State<Profile> {
   final ImagePicker _picker = ImagePicker();
 
   List<Map<String, String>> get userInfo => [
-    {'label': 'Name', 'value': widget.name, 'icon': 'person'},
-    {'label': 'Email', 'value': widget.email, 'icon': 'email'},
-    {'label': 'Password', 'value': widget.password, 'icon': 'lock'},
-  ];
+        {'label': 'Name', 'value': widget.name, 'icon': 'person'},
+        {'label': 'Email', 'value': widget.email, 'icon': 'email'},
+        {'label': 'Password', 'value': widget.password, 'icon': 'lock'},
+      ];
 
   IconData getIcon(String iconName) {
     switch (iconName) {
@@ -36,7 +36,6 @@ class _ProfileState extends State<Profile> {
         return Icons.person;
       case 'email':
         return Icons.email;
-
       case 'lock':
         return Icons.lock;
       default:
@@ -57,79 +56,109 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isTablet = size.width > 600;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          const SizedBox(height: 100),
-          GestureDetector(
-            onTap: _pickImage,
-            child: Center(
-              child: Container(
-                height: 120,
-                width: 120,
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(60),
-                ),
-                child:
-                    _selectedImage != null
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: isTablet ? 32 : 16,
+            vertical: 20,
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: size.height * 0.1),
+              GestureDetector(
+                onTap: _pickImage,
+                child: Center(
+                  child: Container(
+                    height: isTablet ? 150 : 120,
+                    width: isTablet ? 150 : 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: _selectedImage != null
                         ? ClipRRect(
-                          borderRadius: BorderRadius.circular(60),
-                          child: Image.file(
-                            _selectedImage!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        )
+                            borderRadius: BorderRadius.circular(100),
+                            child: Image.file(
+                              _selectedImage!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          )
                         : const Center(
-                          child: Text(
-                            'Select Image',
-                            style: TextStyle(fontSize: 16, color: Colors.black),
+                            child: Text(
+                              'Select Image',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
                           ),
-                        ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 30),
-          Container(
-            height: 534,
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'User Information',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                ...userInfo.map((item) {
-                  return Column(
-                    children: [
-                      ListTile(
-                        leading: Icon(getIcon(item['icon']!)),
-                        title: Text(item['label']!),
-                        subtitle: Text(item['value']!),
+              ),
+              const SizedBox(height: 30),
+
+              // User Info
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'User Information',
+                      style: TextStyle(
+                        fontSize: isTablet ? 26 : 22,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const Divider(),
-                    ],
-                  );
-                }).toList(),
-              ],
-            ),
+                    ),
+                    const SizedBox(height: 16),
+                    ...userInfo.map((item) {
+                      return Column(
+                        children: [
+                          ListTile(
+                            leading: Icon(
+                              getIcon(item['icon']!),
+                              size: isTablet ? 30 : 24,
+                            ),
+                            title: Text(
+                              item['label']!,
+                              style: TextStyle(
+                                fontSize: isTablet ? 18 : 16,
+                              ),
+                            ),
+                            subtitle: Text(
+                              item['value']!,
+                              style: TextStyle(
+                                fontSize: isTablet ? 16 : 14,
+                              ),
+                            ),
+                          ),
+                          const Divider(),
+                        ],
+                      );
+                    }).toList(),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

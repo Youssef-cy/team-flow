@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:task_team/Task_all%20.dart';
-import 'package:task_team/login.dart';
-import 'package:task_team/projectpage.dart';
+import 'package:task_team/profile.dart';
+import 'package:task_team/login.dart'; // ✅ استدعاء صفحة اللوجين
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,307 +10,244 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final TextEditingController _searchController = TextEditingController();
-  String name = "Alex";
+  int selected = 0;
 
-  List<Map> filteredTasks = [];
-
-  @override
-  void initState() {
-    super.initState();
-    filteredTasks = List.from(globalTasks);
-    _searchController.addListener(_filterTasks);
-  }
-
-  void _filterTasks() {
-    String query = _searchController.text.toLowerCase();
-
-    setState(() {
-      if (query.isEmpty) {
-        filteredTasks = List.from(globalTasks);
-      } else {
-        filteredTasks =
-            globalTasks.where((task) {
-              final title = (task['title'] ?? '').toString().toLowerCase();
-              final subtasks = (task['tasks'] as List?) ?? [];
-
-              final foundInSubtasks = subtasks.any((sub) {
-                if (sub is Map && sub['name'] is String) {
-                  return sub['name'].toLowerCase().contains(query);
-                }
-                return false;
-              });
-
-              return title.contains(query) || foundInSubtasks;
-            }).toList();
-      }
-    });
-  }
-
-  List<Map> projects = [
+  final List<Map<String, dynamic>> organizationTasks = [
     {
-      "name": "Pizza & Pints",
-      "date": "10 Feb 2023  10:30 AM",
-      "members": "+2",
-      "progress": "24%",
-      "tasks": "14 of 22 tasks completed",
+      "color": Colors.orange,
+      "title": "Availability",
+      "subtitle": "Available on Weekdays, 9AM - 6PM Only",
+      "footer": "Sat-Sun",
     },
     {
-      "name": "Mobile App Design",
-      "date": "15 Mar 2023  02:00 PM",
-      "members": "+5",
-      "progress": "65%",
-      "tasks": "26 of 40 tasks completed",
+      "color": Colors.green,
+      "title": "Open Shifts",
+      "subtitle": "4 Shifts - Join!",
+      "footer": "Desk - 3/7 · 4PM",
     },
     {
-      "name": "Website Redesign",
-      "date": "20 Jan 2023  09:15 AM",
-      "members": "+3",
-      "progress": "90%",
-      "tasks": "9 of 10 tasks completed",
+      "color": Colors.blue,
+      "title": "Time Off",
+      "subtitle": "3 Requests (1 Approved, 1 Pending, 1 Rejected)",
+      "footer": "Jul 15, 2025",
+    },
+  ];
+
+  final List<Map<String, dynamic>> mySpaceTasks = [
+    {
+      "color": Colors.purple,
+      "title": "Personal Notes",
+      "subtitle": "3 ideas saved to draft",
+      "footer": "Updated Today",
+    },
+    {
+      "color": Colors.red,
+      "title": "Health Check",
+      "subtitle": "Workout schedule pending",
+      "footer": "Next: Tomorrow 8AM",
+    },
+    {
+      "color": Colors.teal,
+      "title": "Learning",
+      "subtitle": "Flutter course progress: 45%",
+      "footer": "Due Sep 20",
     },
   ];
 
   @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final currentTasks = selected == 0 ? organizationTasks : mySpaceTasks;
+
+    // أبعاد الشاشة
+    final size = MediaQuery.of(context).size;
+    final isTablet = size.width > 600;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 15),
-            Container(
-              height: 60,
-              width: double.infinity,
-              child: Row(
-                children: [
-                  const SizedBox(width: 20),
-                  Title(
-                    color: Colors.black,
-                    child: Text(
-                      "Welcome Back $name",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 25,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.notifications),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final textScale = (constraints.maxWidth / 400).clamp(0.9, 1.3);
+
+          return Padding(
+            padding: EdgeInsets.all(isTablet ? 30 : 20),
+            child: ListView(
+              children: [
+                // Top Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Icon(Icons.grid_view_rounded, size: isTablet ? 40 : 30),
+                    GestureDetector(
+                      onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Login()),
+                          MaterialPageRoute(
+                            builder: (context) => const Profile(
+                              name: 'User Name',
+                              email: '',
+                              phone: '',
+                              password: '',
+                            ),
+                          ),
                         );
-                      });
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 20.0),
-                      child: Icon(Icons.person, size: 28),
+                      },
+                      child: CircleAvatar(
+                        radius: isTablet ? 30 : 20,
+                        backgroundImage: const NetworkImage(
+                          "https://i.pravatar.cc/150?img=3",
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+                SizedBox(height: isTablet ? 40 : 25),
+
+                // Title
+                Text(
+                  "Stay Updated on\nYour Schedule",
+                  style: TextStyle(
+                    fontSize: (isTablet ? 28 : 22) * textScale,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 20),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search for Task...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
+                ),
+                SizedBox(height: isTablet ? 30 : 20),
+
+                // Tabs
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(25),
                   ),
+                  child: Row(
+                    children: [
+                      _buildTab("Organization", 0, isTablet),
+                      _buildTab("My Space", 1, isTablet),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+                SizedBox(height: isTablet ? 35 : 25),
 
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 175,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: projects.length,
-                itemBuilder: (context, index) {
-                  final project = projects[index];
-                  return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => ProjectPage(
-                                projectName: project["name"],
-                                date: project["date"],
-                                completedTasks: int.parse(
-                                  project["tasks"].split(' ')[0],
-                                ),
-                                totalTasks: int.parse(
-                                  project["tasks"].split(' ')[2],
-                                ),
-                                taskTitle: null,
-                              ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      width: 250,
-                      margin: EdgeInsets.only(
-                        left: index == 0 ? 20 : 10,
-                        right: index == projects.length - 1 ? 20 : 0,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        color: Colors.black,
-                      ),
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            project["name"],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            project["date"],
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Text(
-                            project["progress"],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            project["tasks"],
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
+                // Pending Requests
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Pending Requests",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: isTablet ? 20 : 16,
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 30),
-            const Row(
-              children: [
-                SizedBox(width: 30),
-                Text(
-                  "Your Task Today's",
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 25),
+                    Icon(Icons.refresh, size: isTablet ? 28 : 22),
+                  ],
                 ),
+                SizedBox(height: isTablet ? 25 : 15),
+
+                // Cards
+                ...currentTasks.map((task) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: _buildCard(
+                      color: task["color"],
+                      title: task["title"],
+                      subtitle: task["subtitle"],
+                      footer: task["footer"],
+                      isTablet: isTablet,
+                      textScale: textScale,
+                    ),
+                  );
+                }).toList(),
               ],
             ),
+          );
+        },
+      ),
 
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: filteredTasks.length,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemBuilder: (context, index) {
-                  final task = filteredTasks[index];
-                  final subtasks = (task['tasks'] as List?) ?? [];
+      // ✅ Floating Action Button
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Login()), // صفحة اللوجين
+          );
+        },
+        backgroundColor: Colors.black,
+        label: const Text(
+          "Login",
+          style: TextStyle(color: Colors.white),
+        ),
+        icon: const Icon(Icons.login, color: Colors.white),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
 
-                  return Container(
-                    // تم تغيير InkWell إلى Container هنا
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          task['title'] ?? '',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        ...subtasks.asMap().entries.map((entry) {
-                          final item = entry.value as Map;
-
-                          return InkWell(
-                            onTap: () {
-                              final isCompleted = item['isCompleted'] ?? false;
-                              setState(() {
-                                item['isCompleted'] = !isCompleted;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 6.0,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    item['isCompleted'] == true
-                                        ? Icons.check_circle
-                                        : Icons.radio_button_unchecked,
-                                    color:
-                                        item['isCompleted'] == true
-                                            ? Colors.green
-                                            : Colors.grey,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    item['name'] ?? '',
-                                    style: TextStyle(
-                                      color:
-                                          item['isCompleted'] == true
-                                              ? Colors.black87
-                                              : Colors.black,
-                                      decoration:
-                                          item['isCompleted'] == true
-                                              ? TextDecoration.lineThrough
-                                              : TextDecoration.none,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ],
-                    ),
-                  );
-                },
+  Widget _buildTab(String label, int index, bool isTablet) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            selected = index;
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: isTablet ? 16 : 12),
+          decoration: BoxDecoration(
+            color: selected == index ? Colors.black : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: selected == index ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w500,
+                fontSize: isTablet ? 18 : 14,
               ),
             ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCard({
+    required Color color,
+    required String title,
+    required String subtitle,
+    required String footer,
+    required bool isTablet,
+    required double textScale,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isTablet ? 24 : 18),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: (isTablet ? 20 : 16) * textScale,
+            ),
+          ),
+          SizedBox(height: isTablet ? 10 : 8),
+          Text(
+            subtitle,
+            style: TextStyle(fontSize: (isTablet ? 16 : 14) * textScale),
+          ),
+          SizedBox(height: isTablet ? 16 : 12),
+          Text(
+            footer,
+            style: const TextStyle(color: Colors.black54),
+          ),
+        ],
       ),
     );
   }
