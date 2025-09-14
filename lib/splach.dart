@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
+import 'package:task_team/login.dart';
 import 'dart:async';
+
+import 'package:task_team/main.dart';
 
 class Splach extends StatefulWidget {
   const Splach({super.key});
@@ -11,14 +15,27 @@ class Splach extends StatefulWidget {
 }
 
 class _SplachState extends State<Splach> {
+  Future<User?> getUser() async {
+    final session = supabase.auth.currentSession; // No await here
+    return session?.user; // Safely return user or null
+  }
+
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const NavBarPage()),
-      );
+    Timer(const Duration(seconds: 3), () async {
+      User? user = await getUser();
+      if (user == null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Login()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const NavBarPage()),
+        );
+      }
     });
   }
 

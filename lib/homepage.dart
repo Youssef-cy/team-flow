@@ -82,12 +82,13 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const Profile(
-                              name: 'User Name',
-                              email: '',
-                              phone: '',
-                              password: '',
-                            ),
+                            builder:
+                                (context) => const Profile(
+                                  name: 'User Name',
+                                  email: '',
+                                  phone: '',
+                                  password: '',
+                                ),
                           ),
                         );
                       },
@@ -165,21 +166,6 @@ class _HomePageState extends State<HomePage> {
       ),
 
       // ✅ Floating Action Button
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Login()), // صفحة اللوجين
-          );
-        },
-        backgroundColor: Colors.black,
-        label: const Text(
-          "Login",
-          style: TextStyle(color: Colors.white),
-        ),
-        icon: const Icon(Icons.login, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -243,10 +229,7 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(fontSize: (isTablet ? 16 : 14) * textScale),
           ),
           SizedBox(height: isTablet ? 16 : 12),
-          Text(
-            footer,
-            style: const TextStyle(color: Colors.black54),
-          ),
+          Text(footer, style: const TextStyle(color: Colors.black54)),
         ],
       ),
     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'profile.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:task_team/Component/nev_bar.dart';
+import 'package:task_team/main.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,6 +16,29 @@ class _LoginState extends State<Login> {
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
+
+  Future<User?> _Signup(String name, String email, String password) async {
+    final response = await supabase.auth.signUp(
+      email: email,
+      password: password,
+    );
+
+    if (response.user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("You messed up")));
+      return null;
+    }
+
+    print(response.user!.id);
+
+    final insertResponse = await supabase.from('profiles').insert({
+      'user_id': response.user!.id,
+      'full_name': name,
+    });
+
+    return response.user!;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,26 +54,6 @@ class _LoginState extends State<Login> {
         child: Column(
           children: [
             SizedBox(height: screenHeight * 0.07),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: theme.dividerColor),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(Icons.arrow_back, color: theme.iconTheme.color),
-                  ),
-                ),
-              ),
-            ),
 
             const SizedBox(height: 50),
 
@@ -132,18 +137,17 @@ class _LoginState extends State<Login> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => Profile(
-                                      name: nameController.text,
-                                      email: emailController.text,
-                                      phone: phoneController.text,
-                                      password: passwordController.text,
-                                    ),
-                              ),
+                          onPressed: () async {
+                            final user = await _Signup(
+                              nameController.text,
+                              emailController.text,
+                              passwordController.text,
+                            );
+                            if (user == null) {
+                              return;
+                            }
+                            MaterialPageRoute(
+                              builder: (context) => NavBarPage(),
                             );
                           },
                           child: Row(
@@ -170,28 +174,7 @@ class _LoginState extends State<Login> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            socialButton(
-                              label: "Google",
-                              icon: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.asset(
-                                  'assets/download.png',
-                                  height: 24,
-                                ),
-                              ),
-                              theme: theme,
-                            ),
-                            socialButton(
-                              label: "Apple",
-                              icon: Icon(
-                                Icons.apple,
-                                color: theme.iconTheme.color,
-                                size: 24,
-                              ),
-                              theme: theme,
-                            ),
-                          ],
+                          children: [],
                         ),
                       ),
                     ],
