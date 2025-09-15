@@ -6,6 +6,7 @@ import 'package:task_team/login.dart';
 import 'dart:async';
 
 import 'package:task_team/main.dart';
+import 'package:task_team/signin.dart';
 
 class Splach extends StatefulWidget {
   const Splach({super.key});
@@ -28,7 +29,7 @@ class _SplachState extends State<Splach> {
       if (user == null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Login()),
+          MaterialPageRoute(builder: (context) => const SignUp()),
         );
       } else {
         Navigator.pushReplacement(

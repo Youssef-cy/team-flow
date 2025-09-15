@@ -4,26 +4,27 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
 import 'package:task_team/main.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class SignUp extends StatefulWidget {
+  const SignUp({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<SignUp> createState() => _SignupState();
 }
 
-class _LoginState extends State<Login> {
+class _SignupState extends State<SignUp> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
+  // TODO : make a form validator
+
   Future<User?> _Signup(String name, String email, String password) async {
     try {
-      final response = await supabase.auth.signUp(
+      final response = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
-
       final insertResponse = await supabase.from('profiles').insert({
         'user_id': response.user!.id,
         'full_name': name,
@@ -31,13 +32,15 @@ class _LoginState extends State<Login> {
 
       return response.user!;
     } catch (e) {
-      if (e.runtimeType == AuthWeakPasswordException) {
-        // TODO : a snack bar to show the user entered an already existing account
-        return null;
-      } else if (e.runtimeType == AuthApiException) {
-        // TODO : a snack bar to show the user entered an already existing account
-        return null;
+      if (e.runtimeType == AuthApiException) {
+        // TODO : make a SnackBar to show that he make entered a wrong cardinalties
+      } else if (e.runtimeType == AuthWeakPasswordException) {
+        // TODO : make a SnackBar to show that he entered a invalide password eg : a password less that 6 charachters
       }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("You messed up ${e.toString()}")));
+      return null;
     }
   }
 
@@ -160,12 +163,12 @@ class _LoginState extends State<Login> {
                               Icon(Icons.login, color: Colors.white),
                               SizedBox(width: 8),
                               Text(
-                                "Signup",
-                                // TODO : make a button to the Login in page Signup() component
+                                "Login",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                 ),
+                                // TODO : make a button to the Signup page Login() component
                               ),
                             ],
                           ),
