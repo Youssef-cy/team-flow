@@ -75,8 +75,11 @@ class _NavBarPageState extends State<NavBarPage> {
                 label: 'notifications',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.add_circle,
-                    size: addIconSize, color: Colors.green),
+                icon: Icon(
+                  Icons.add_circle,
+                  size: addIconSize,
+                  color: Colors.green,
+                ),
                 label: 'add',
               ),
             ],

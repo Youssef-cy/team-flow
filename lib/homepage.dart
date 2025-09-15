@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/profile.dart';
-import 'package:task_team/login.dart'; // ✅ استدعاء صفحة اللوجين
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -56,7 +57,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final currentTasks = selected == 0 ? organizationTasks : mySpaceTasks;
+    final taskprovider = Provider.of<TaskProvider>(context);
+    final List<Task> tasks = taskprovider.tasks;
+
+    final currentTasks = tasks;
 
     // أبعاد الشاشة
     final size = MediaQuery.of(context).size;
@@ -147,13 +151,27 @@ class _HomePageState extends State<HomePage> {
 
                 // Cards
                 ...currentTasks.map((task) {
+                  final localDate = task.updatedAt!.toLocal();
+
+                  final hour12 =
+                      localDate.hour % 12 == 0 ? 12 : localDate.hour % 12;
+                  final period = localDate.hour >= 12 ? "PM" : "AM";
+
+                  // Build formatted string
+                  final formatted =
+                      "${localDate.year}-"
+                      "${localDate.month.toString().padLeft(2, '0')}-"
+                      "${localDate.day.toString().padLeft(2, '0')}    "
+                      "${hour12.toString().padLeft(2, '0')}:"
+                      "${localDate.minute.toString().padLeft(2, '0')}"
+                      " $period";
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 15),
                     child: _buildCard(
-                      color: task["color"],
-                      title: task["title"],
-                      subtitle: task["subtitle"],
-                      footer: task["footer"],
+                      color: Colors.red,
+                      title: task.taskName,
+                      subtitle: task.subTask ?? "",
+                      footer: formatted,
                       isTablet: isTablet,
                       textScale: textScale,
                     ),

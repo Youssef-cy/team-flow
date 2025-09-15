@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/splach.dart';
 
 Future<void> main() async {
@@ -11,7 +13,12 @@ Future<void> main() async {
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkcmprY2R4b2JyeHB4b21odnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkyMTk4MzUsImV4cCI6MjA2NDc5NTgzNX0.bOIrdYtNeWJu1hl4OOyq9RMpMSwTdzJu6cFkmGSJSmU",
   );
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => TaskProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 final supabase = Supabase.instance.client;

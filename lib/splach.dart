@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
+import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/login.dart';
 import 'dart:async';
 
@@ -24,24 +26,33 @@ class _SplachState extends State<Splach> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () async {
-      User? user = await getUser();
-      if (user == null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const SignUp()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const NavBarPage()),
-        );
-      }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Wait for the provider to finish loading
+      await Provider.of<TaskProvider>(context, listen: false).FillTasks();
+
+      // After tasks are loaded, wait 3 seconds and then navigate
+      Timer(const Duration(seconds: 3), () async {
+        User? user = await getUser();
+
+        if (user == null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const SignUp()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const NavBarPage()),
+          );
+        }
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<TaskProvider>(context, listen: false).FillTasks();
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
