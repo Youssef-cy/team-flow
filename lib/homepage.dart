@@ -13,54 +13,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int selected = 0;
 
-  final List<Map<String, dynamic>> organizationTasks = [
-    {
-      "color": Colors.orange,
-      "title": "Availability",
-      "subtitle": "Available on Weekdays, 9AM - 6PM Only",
-      "footer": "Sat-Sun",
-    },
-    {
-      "color": Colors.green,
-      "title": "Open Shifts",
-      "subtitle": "4 Shifts - Join!",
-      "footer": "Desk - 3/7 · 4PM",
-    },
-    {
-      "color": Colors.blue,
-      "title": "Time Off",
-      "subtitle": "3 Requests (1 Approved, 1 Pending, 1 Rejected)",
-      "footer": "Jul 15, 2025",
-    },
-  ];
-
-  final List<Map<String, dynamic>> mySpaceTasks = [
-    {
-      "color": Colors.purple,
-      "title": "Personal Notes",
-      "subtitle": "3 ideas saved to draft",
-      "footer": "Updated Today",
-    },
-    {
-      "color": Colors.red,
-      "title": "Health Check",
-      "subtitle": "Workout schedule pending",
-      "footer": "Next: Tomorrow 8AM",
-    },
-    {
-      "color": Colors.teal,
-      "title": "Learning",
-      "subtitle": "Flutter course progress: 45%",
-      "footer": "Due Sep 20",
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     final taskprovider = Provider.of<TaskProvider>(context);
     final List<Task> tasks = taskprovider.tasks;
-
-    final currentTasks = tasks;
+    final List<Task> orgTasks = [];
+    final currentTasks = selected == 0 ? orgTasks : tasks;
 
     // أبعاد الشاشة
     final size = MediaQuery.of(context).size;
