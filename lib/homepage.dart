@@ -43,20 +43,17 @@ class _HomePageState extends State<HomePage> {
                     Icon(Icons.grid_view_rounded, size: isTablet ? 40 : 30),
                     GestureDetector(
                       onTap: () {
-                        if (user != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => Profile(
-                                    name: user.name!,
-                                    email: user.email,
-                                    phone: '',
-                                    password: '',
-                                  ),
-                            ),
-                          );
-                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => Profile(
+                                  name: user.name!,
+                                  email: user.email,
+                                  phone: '',
+                                ),
+                          ),
+                        );
                       },
                       child: CircleAvatar(
                         radius: isTablet ? 30 : 20,
@@ -65,6 +62,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
+                // Top Bar
                 SizedBox(height: isTablet ? 40 : 25),
 
                 // Title

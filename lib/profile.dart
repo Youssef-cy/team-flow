@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -8,14 +9,12 @@ class Profile extends StatefulWidget {
   final String name;
   final String email;
   final String phone;
-  final String password;
 
   const Profile({
     super.key,
     required this.name,
     required this.email,
     required this.phone,
-    required this.password,
   });
 
   @override
@@ -23,13 +22,11 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
   List<Map<String, String>> get userInfo => [
     {'label': 'Name', 'value': widget.name, 'icon': 'person'},
     {'label': 'Email', 'value': widget.email, 'icon': 'email'},
-    {'label': 'Password', 'value': widget.password, 'icon': 'lock'},
   ];
 
   IconData getIcon(String iconName) {
@@ -45,14 +42,12 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  Future<void> _pickImage() async {
+  Future<XFile?> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
     );
     if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
+      return pickedFile;
     }
   }
 
@@ -75,7 +70,11 @@ class _ProfileState extends State<Profile> {
             children: [
               SizedBox(height: size.height * 0.1),
               GestureDetector(
-                onTap: _pickImage,
+                onTap: () async {
+                  final photo = await _pickImage();
+                  await userProvider.updateProfilePic(photo!);
+                  setState(() {});
+                },
                 child: Center(
                   child: Container(
                     height: isTablet ? 150 : 120,
@@ -108,10 +107,7 @@ class _ProfileState extends State<Profile> {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,7 +120,10 @@ class _ProfileState extends State<Profile> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    ...userInfo.map((item) {
+                    ...userInfo.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final item = entry.value;
+
                       return Column(
                         children: [
                           ListTile(
@@ -141,7 +140,8 @@ class _ProfileState extends State<Profile> {
                               style: TextStyle(fontSize: isTablet ? 16 : 14),
                             ),
                           ),
-                          const Divider(),
+                          if (index != userInfo.length - 1)
+                            const Divider(), // ✅ Only show divider if NOT last
                         ],
                       );
                     }).toList(),
