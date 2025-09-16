@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +40,7 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  // ignore: body_might_complete_normally_nullable
   Future<XFile?> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,

@@ -186,6 +186,7 @@ class _HomePageState extends State<HomePage> {
       width: double.infinity,
       padding: EdgeInsets.all(isTablet ? 24 : 18),
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
       ),

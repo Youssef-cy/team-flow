@@ -4,14 +4,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
 import 'package:task_team/main.dart';
 
-class SignUp extends StatefulWidget {
-  const SignUp({super.key});
+class Signin extends StatefulWidget {
+  const Signin({super.key});
 
   @override
-  State<SignUp> createState() => _SignupState();
+  State<Signin> createState() => _SigninState();
 }
 
-class _SignupState extends State<SignUp> {
+class _SigninState extends State<Signin> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
@@ -19,13 +19,13 @@ class _SignupState extends State<SignUp> {
 
   // TODO : make a form validator
 
-  Future<User?> _Signup(String name, String email, String password) async {
+  Future<User?> _Signin(String name, String email, String password) async {
     try {
       final response = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
-      final insertResponse = await supabase.from('profiles').insert({
+      await supabase.from('profiles').insert({
         'user_id': response.user!.id,
         'full_name': name,
       });
@@ -142,7 +142,7 @@ class _SignupState extends State<SignUp> {
                             borderRadius: BorderRadius.circular(15),
                           ),
                           onPressed: () async {
-                            final user = await _Signup(
+                            final user = await _Signin(
                               nameController.text,
                               emailController.text,
                               passwordController.text,

@@ -5,11 +5,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
 import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
-import 'package:task_team/login.dart';
 import 'dart:async';
 
 import 'package:task_team/main.dart';
-import 'package:task_team/signin.dart';
+import 'package:task_team/Signin.dart';
 
 class Splach extends StatefulWidget {
   const Splach({super.key});
@@ -32,24 +31,26 @@ class _SplachState extends State<Splach> {
       // Wait for the provider to finish loading
 
       User? user = await getUser();
+      if (user == null) {
+        Timer(const Duration(seconds: 3), () async {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Signin()),
+          );
+        });
+        return;
+      }
       await Provider.of<TaskProvider>(context, listen: false).FillTasks();
       await Provider.of<UserProvider>(
         context,
         listen: false,
-      ).addUser(user!.email!, user.id);
+      ).addUser(user.email!, user.id);
       // After tasks are loaded, wait 3 seconds and then navigate
       Timer(const Duration(seconds: 3), () async {
-        if (user.id == null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const SignUp()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const NavBarPage()),
-          );
-        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const NavBarPage()),
+        );
       });
     });
   }

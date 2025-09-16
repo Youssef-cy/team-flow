@@ -4,19 +4,20 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
 import 'package:task_team/main.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Signup extends StatefulWidget {
+  const Signup({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Signup> createState() => _SignupState();
 }
 
-class _LoginState extends State<Login> {
+class _SignupState extends State<Signup> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
+  // ignore: body_might_complete_normally_nullable
   Future<User?> _Signup(String name, String email, String password) async {
     try {
       final response = await supabase.auth.signUp(
@@ -24,7 +25,7 @@ class _LoginState extends State<Login> {
         password: password,
       );
 
-      final insertResponse = await supabase.from('profiles').insert({
+      await supabase.from('profiles').insert({
         'user_id': response.user!.id,
         'full_name': name,
       });
