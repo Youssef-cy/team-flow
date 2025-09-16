@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
 import 'package:task_team/TaskProvider.dart';
+import 'package:task_team/UserProvider.dart';
 import 'package:task_team/login.dart';
 import 'dart:async';
 
@@ -29,13 +30,16 @@ class _SplachState extends State<Splach> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Wait for the provider to finish loading
-      await Provider.of<TaskProvider>(context, listen: false).FillTasks();
 
+      User? user = await getUser();
+      await Provider.of<TaskProvider>(context, listen: false).FillTasks();
+      await Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).addUser(user!.email!, user.id);
       // After tasks are loaded, wait 3 seconds and then navigate
       Timer(const Duration(seconds: 3), () async {
-        User? user = await getUser();
-
-        if (user == null) {
+        if (user.id == null) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const SignUp()),

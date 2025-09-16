@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:task_team/UserProvider.dart';
 
 class Profile extends StatefulWidget {
   final String name;
@@ -25,10 +27,10 @@ class _ProfileState extends State<Profile> {
   final ImagePicker _picker = ImagePicker();
 
   List<Map<String, String>> get userInfo => [
-        {'label': 'Name', 'value': widget.name, 'icon': 'person'},
-        {'label': 'Email', 'value': widget.email, 'icon': 'email'},
-        {'label': 'Password', 'value': widget.password, 'icon': 'lock'},
-      ];
+    {'label': 'Name', 'value': widget.name, 'icon': 'person'},
+    {'label': 'Email', 'value': widget.email, 'icon': 'email'},
+    {'label': 'Password', 'value': widget.password, 'icon': 'lock'},
+  ];
 
   IconData getIcon(String iconName) {
     switch (iconName) {
@@ -58,9 +60,11 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isTablet = size.width > 600;
-
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.user;
     return Scaffold(
       backgroundColor: Colors.white,
+      // TODO : please for the love of god add a back button to make debuging on desktop easier
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -81,25 +85,15 @@ class _ProfileState extends State<Profile> {
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(100),
                     ),
-                    child: _selectedImage != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(100),
-                            child: Image.file(
-                              _selectedImage!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
-                          )
-                        : const Center(
-                            child: Text(
-                              'Select Image',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: Image.network(
+                        user!.profilePic!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -108,8 +102,10 @@ class _ProfileState extends State<Profile> {
               // User Info
               Container(
                 width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 24,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: const BorderRadius.only(
@@ -138,15 +134,11 @@ class _ProfileState extends State<Profile> {
                             ),
                             title: Text(
                               item['label']!,
-                              style: TextStyle(
-                                fontSize: isTablet ? 18 : 16,
-                              ),
+                              style: TextStyle(fontSize: isTablet ? 18 : 16),
                             ),
                             subtitle: Text(
                               item['value']!,
-                              style: TextStyle(
-                                fontSize: isTablet ? 16 : 14,
-                              ),
+                              style: TextStyle(fontSize: isTablet ? 16 : 14),
                             ),
                           ),
                           const Divider(),

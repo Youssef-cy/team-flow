@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_team/TaskProvider.dart';
+import 'package:task_team/UserProvider.dart';
 import 'package:task_team/profile.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +24,8 @@ class _HomePageState extends State<HomePage> {
     // أبعاد الشاشة
     final size = MediaQuery.of(context).size;
     final isTablet = size.width > 600;
-
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.user;
     return Scaffold(
       backgroundColor: Colors.white,
       body: LayoutBuilder(
@@ -41,24 +43,24 @@ class _HomePageState extends State<HomePage> {
                     Icon(Icons.grid_view_rounded, size: isTablet ? 40 : 30),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => const Profile(
-                                  name: 'User Name',
-                                  email: '',
-                                  phone: '',
-                                  password: '',
-                                ),
-                          ),
-                        );
+                        if (user != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => Profile(
+                                    name: user.name!,
+                                    email: user.email,
+                                    phone: '',
+                                    password: '',
+                                  ),
+                            ),
+                          );
+                        }
                       },
                       child: CircleAvatar(
                         radius: isTablet ? 30 : 20,
-                        backgroundImage: const NetworkImage(
-                          "https://i.pravatar.cc/150?img=3",
-                        ),
+                        backgroundImage: NetworkImage(user!.profilePic!),
                       ),
                     ),
                   ],
