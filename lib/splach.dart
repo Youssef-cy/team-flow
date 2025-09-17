@@ -3,11 +3,12 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
+import 'package:task_team/Signup.dart';
 import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
 import 'dart:async';
 import 'package:task_team/main.dart';
-import 'package:task_team/Signin.dart';
+import 'package:task_team/profile.dart';
 
 class Splach extends StatefulWidget {
   const Splach({super.key});
@@ -30,12 +31,33 @@ class _SplachState extends State<Splach> {
       final user = getUser();
 
       if (user == null) {
+<<<<<<< HEAD
         // Navigate to Signin after 3 seconds
         await Future.delayed(const Duration(seconds: 3));
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const Signin()),
+=======
+        Timer(const Duration(seconds: 3), () async {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Signup()),
+          );
+        });
+        return;
+      }
+      await Provider.of<TaskProvider>(context, listen: false).FillTasks();
+      await Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).addUser(user.email!, user.id);
+      // After tasks are loaded, wait 3 seconds and then navigate
+      Timer(const Duration(seconds: 3), () async {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => NavBarPage()),
+>>>>>>> 11e4318174532e5b470ec5c532c1be06487a3940
         );
         return;
       }
