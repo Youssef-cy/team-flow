@@ -6,7 +6,6 @@ import 'package:task_team/Component/nev_bar.dart';
 import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
 import 'dart:async';
-
 import 'package:task_team/main.dart';
 import 'package:task_team/Signin.dart';
 
@@ -18,9 +17,9 @@ class Splach extends StatefulWidget {
 }
 
 class _SplachState extends State<Splach> {
-  Future<User?> getUser() async {
-    final session = supabase.auth.currentSession; // No await here
-    return session?.user; // Safely return user or null
+  /// Get the current logged-in user
+  User? getUser() {
+    return supabase.auth.currentUser;
   }
 
   @override
@@ -28,36 +27,38 @@ class _SplachState extends State<Splach> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Wait for the provider to finish loading
+      final user = getUser();
 
-      User? user = await getUser();
       if (user == null) {
-        Timer(const Duration(seconds: 3), () async {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Signin()),
-          );
-        });
-        return;
-      }
-      await Provider.of<TaskProvider>(context, listen: false).FillTasks();
-      await Provider.of<UserProvider>(
-        context,
-        listen: false,
-      ).addUser(user.email!, user.id);
-      // After tasks are loaded, wait 3 seconds and then navigate
-      Timer(const Duration(seconds: 3), () async {
+        // Navigate to Signin after 3 seconds
+        await Future.delayed(const Duration(seconds: 3));
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const NavBarPage()),
+          MaterialPageRoute(builder: (context) => const Signin()),
         );
-      });
+        return;
+      }
+
+      // Load tasks and user data
+      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      await taskProvider.FillTasks();
+      await userProvider.addUser(user.email!, user.id);
+
+      // Navigate to main page after loading
+      await Future.delayed(const Duration(seconds: 3));
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const NavBarPage()),
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<TaskProvider>(context, listen: false).FillTasks();
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
