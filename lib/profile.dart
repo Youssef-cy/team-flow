@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/ios.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:task_team/Signup.dart';
 import 'package:task_team/UserProvider.dart';
+import 'package:task_team/main.dart';
 
 class Profile extends StatefulWidget {
   final String name;
@@ -58,99 +62,319 @@ class _ProfileState extends State<Profile> {
     final user = userProvider.user;
     return Scaffold(
       backgroundColor: Colors.white,
-      // TODO : please for the love of god add a back button to make debuging on desktop easier
       body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: isTablet ? 32 : 16,
-            vertical: 20,
-          ),
-          child: Column(
-            children: [
-              SizedBox(height: size.height * 0.1),
-              GestureDetector(
-                onTap: () async {
-                  final photo = await _pickImage();
-                  await userProvider.updateProfilePic(photo!);
-                  setState(() {});
-                },
-                child: Center(
-                  child: Container(
-                    height: isTablet ? 150 : 120,
-                    width: isTablet ? 150 : 120,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: Image.network(
-                        user!.profilePic!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
+        child: Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              height: 300,
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 27, 27, 27),
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                final photo = await _pickImage();
+                await userProvider.updateProfilePic(photo!);
+                setState(() {});
+              },
+              child: Center(
+                child: Column(
+                  children: [
+                    SizedBox(height: 20),
+
+                    Text(
+                      "Account",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 20,
+                        color: Colors.white,
                       ),
                     ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30.0),
+                      child: Container(
+                        height: isTablet ? 150 : 120,
+                        width: isTablet ? 150 : 120,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Stack(
+                            children: [
+                              Image.network(
+                                user!.profilePic!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                              Positioned(
+                                bottom: 15,
+                                right: 10,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: Container(
+                                    height: 30,
+                                    width: 30,
+                                    color: Colors.black,
+                                    child: Icon(
+                                      Icons.camera_alt_outlined,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      "User Name ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    Text(
+                      "User email",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.only(left: 15.0, top: 20),
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  color: Colors.grey.shade800,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
-
-              // User Info
-              Container(
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 280.0),
+              child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 24,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(24),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'User Information',
-                      style: TextStyle(
-                        fontSize: isTablet ? 26 : 22,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.grey.shade300,
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 15),
+                          Container(
+                            height: 30,
+                            width: 30,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              color: Colors.grey.shade400,
+                            ),
+                            child: Icon(Icons.edit, size: 20),
+                          ),
+                          SizedBox(width: 15),
+                          Text(
+                            "Edit Profile",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 15.0),
+                            child: Icon(Icons.arrow_forward_ios, size: 20),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    ...userInfo.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final item = entry.value;
-
-                      return Column(
+                    SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.grey.shade300,
+                      ),
+                      child: Row(
                         children: [
-                          ListTile(
-                            leading: Icon(
-                              getIcon(item['icon']!),
-                              size: isTablet ? 30 : 24,
+                          SizedBox(width: 15),
+                          Container(
+                            height: 30,
+                            width: 30,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              color: Colors.grey.shade400,
                             ),
-                            title: Text(
-                              item['label']!,
-                              style: TextStyle(fontSize: isTablet ? 18 : 16),
-                            ),
-                            subtitle: Text(
-                              item['value']!,
-                              style: TextStyle(fontSize: isTablet ? 16 : 14),
-                            ),
+                            child: Icon(Icons.person_off, size: 20),
                           ),
-                          if (index != userInfo.length - 1)
-                            const Divider(), // ✅ Only show divider if NOT last
+                          SizedBox(width: 15),
+                          Text(
+                            "View Blocked Users",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 15.0),
+                            child: Icon(Icons.arrow_forward_ios, size: 20),
+                          ),
                         ],
-                      );
-                    }).toList(),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.grey.shade300,
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 15),
+                          Container(
+                            height: 30,
+                            width: 30,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              color: Colors.grey.shade400,
+                            ),
+                            child: Icon(Icons.settings, size: 20),
+                          ),
+                          SizedBox(width: 15),
+                          Text(
+                            "Settings",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 15.0),
+                            child: Icon(Icons.arrow_forward_ios, size: 20),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() async {
+                          await supabase.auth.signOut();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Signup()),
+                          );
+                        });
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.grey.shade300,
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(width: 15),
+                            Container(
+                              height: 30,
+                              width: 30,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                color: Colors.grey.shade400,
+                              ),
+                              child: Icon(
+                                Icons.edit,
+                                size: 20,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              "Logout",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                            Spacer(),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 15.0),
+                              child: Icon(Icons.arrow_forward_ios, size: 20),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+                  //   const SizedBox(height: 16),
+                  //   ...userInfo.asMap().entries.map((entry) {
+                  //     final index = entry.key;
+                  //     final item = entry.value;
+
+                  //     return Column(
+                  //       children: [
+                  //         ListTile(
+                  //           leading: Icon(
+                  //             getIcon(item['icon']!),
+                  //             size: isTablet ? 30 : 24,
+                  //           ),
+                  //           title: Text(
+                  //             item['label']!,
+                  //             style: TextStyle(fontSize: isTablet ? 18 : 16),
+                  //           ),
+                  //           subtitle: Text(
+                  //             item['value']!,
+                  //             style: TextStyle(fontSize: isTablet ? 16 : 14),
+                  //           ),
+                  //         ),
+                  //         if (index != userInfo.length - 1)
+                  //           const Divider(), // ✅ Only show divider if NOT last
+                  //       ],
+                  //     );
+                  //   }).toList(),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
@@ -16,6 +17,37 @@ class _SignupState extends State<Signup> {
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
+  Future<User?> _Signin(String name, String email, String password) async {
+    try {
+      final response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      await supabase.from('profiles').insert({
+        'user_id': response.user!.id,
+        'full_name': name,
+      });
+
+      return response.user!;
+    } catch (e) {
+      if (e is AuthApiException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("❌ Wrong email or password")),
+        );
+      } else if (e is AuthWeakPasswordException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("⚠ Password too weak (must be 6+ characters)"),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Unexpected error: ${e.toString()}")),
+        );
+      }
+      return null;
+    }
+  }
 
   // ignore: body_might_complete_normally_nullable
   Future<User?> _Signup(String name, String email, String password) async {
@@ -31,16 +63,33 @@ class _SignupState extends State<Signup> {
       });
 
       return response.user!;
+      
     } catch (e) {
-      if (e.runtimeType == AuthWeakPasswordException) {
-        // TODO : a snack bar to show the user entered an already existing account
+      if (e is AuthWeakPasswordException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("⚠ Password is too weak, please use 6+ characters"),
+          ),
+        );
         return null;
-      } else if (e.runtimeType == AuthApiException) {
-        // TODO : a snack bar to show the user entered an already existing account
+      } else if (e is AuthApiException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("❌ Account already exists with this email"),
+          ),
+        );
+        return null;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Unexpected error: ${e.toString()}")),
+        );
         return null;
       }
     }
   }
+
+  int selected = 0;
+  bool checked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,142 +100,407 @@ class _SignupState extends State<Signup> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.black,
       body: SingleChildScrollView(
-        child: Column(
+        child: Stack(
           children: [
             SizedBox(height: screenHeight * 0.07),
 
-            const SizedBox(height: 50),
+            //photo
+            Image.asset("assets/login.jpg"),
 
-            // العنوان
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                "Discover Your Style. Shop Smart. Dress Bold",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  fontSize: isSmall ? 22 : 30,
-                  shadows: [
-                    const Shadow(
-                      offset: Offset(3, 3),
-                      blurRadius: 20,
-                      color: Colors.black26,
+              padding: const EdgeInsets.only(top: 250.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                width: double.infinity,
+                height: 580,
+                child: Column(
+                  children: [
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selected = 0;
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color:
+                                      selected == 0
+                                          ? Colors.white
+                                          : Colors.grey.shade200,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                height: 35,
+                                width: 150,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 45.0,
+                                    top: 2,
+                                  ),
+                                  child: Text(
+                                    "sign up",
+                                    style: TextStyle(
+                                      fontWeight:
+                                          selected == 0
+                                              ? FontWeight.w600
+                                              : FontWeight.w200,
+                                      fontSize: 19,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 15),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selected = 1;
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color:
+                                      selected == 1
+                                          ? Colors.white
+                                          : Colors.grey.shade200,
+
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                height: 35,
+                                width: 150,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 45.0,
+                                    top: 2,
+                                  ),
+                                  child: Text(
+                                    "sign in",
+                                    style: TextStyle(
+                                      fontWeight:
+                                          selected == 1
+                                              ? FontWeight.w600
+                                              : FontWeight.w200,
+                                      fontSize: 19,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    Expanded(
+                      child:
+                          selected == 0
+                              ? Column(
+                                children: [
+                                  // الاسم
+                                  customInputField(
+                                    icon: Icon(
+                                      Icons.person,
+                                      color: Color.fromARGB(255, 130, 178, 61),
+                                    ),
+                                    controller: nameController,
+                                    hint: "Enter your Name",
+                                    width: inputWidth,
+                                    theme: theme,
+                                  ),
+
+                                  const SizedBox(height: 20),
+
+                                  // البريد الإلكتروني
+                                  customInputField(
+                                    icon: Icon(
+                                      Icons.email,
+                                      color: Color.fromARGB(255, 130, 178, 61),
+                                    ),
+
+                                    controller: emailController,
+                                    hint: "Enter your email",
+                                    width: inputWidth,
+                                    theme: theme,
+                                  ),
+
+                                  const SizedBox(height: 20),
+
+                                  // كلمة المرور
+                                  SizedBox(
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 25.0,
+                                          ),
+                                          child: Icon(
+                                            Icons.lock,
+                                            color: Color.fromARGB(
+                                              255,
+                                              130,
+                                              178,
+                                              61,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Container(
+                                          width: 270,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              15,
+                                            ),
+                                          ),
+                                          child: TextField(
+                                            obscureText: checked,
+                                            controller: passwordController,
+                                            decoration: InputDecoration(
+                                              hintText: "Enter Your Password",
+                                              suffixIcon: GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    checked = !checked;
+                                                  });
+                                                },
+                                                child: Icon(
+                                                  checked == false
+                                                      ? Icons.visibility
+                                                      : Icons.visibility_off,
+                                                ),
+                                              ),
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 35),
+
+                                  // زر تسجيل الدخول
+                                  SizedBox(
+                                    height: 60,
+                                    width: screenWidth * 0.6,
+                                    child: FloatingActionButton(
+                                      backgroundColor: Color.fromARGB(
+                                        255,
+                                        130,
+                                        178,
+                                        61,
+                                      ),
+                                      elevation: 20,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      onPressed: () async {
+                                        final user = await _Signup(
+                                          nameController.text,
+                                          emailController.text,
+                                          passwordController.text,
+                                        );
+                                        if (user == null) {
+                                          return;
+                                        }
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) => const NavBarPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: const [
+                                          Icon(
+                                            Icons.login,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Signup",
+                                            // TODO : make a button to the Login in page Signup() component
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                              : Column(
+                                children: [
+                                  // البريد الإلكتروني
+                                  customInputField(
+                                    icon: Icon(
+                                      Icons.email,
+                                      color: Color.fromARGB(255, 130, 178, 61),
+                                    ),
+                                    controller: emailController,
+                                    hint: "Enter your email",
+                                    width: inputWidth,
+                                    theme: theme,
+                                  ),
+
+                                  const SizedBox(height: 20),
+
+                                  // كلمة المرور
+                                  SizedBox(
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 25.0,
+                                          ),
+                                          child: Icon(
+                                            Icons.lock,
+                                            color: Color.fromARGB(
+                                              255,
+                                              130,
+                                              178,
+                                              61,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Container(
+                                          width: 270,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              15,
+                                            ),
+                                          ),
+                                          child: TextField(
+                                            obscureText: checked,
+                                            controller: passwordController,
+                                            decoration: InputDecoration(
+                                              hintText: "Enter Your Password",
+                                              suffixIcon: GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    checked = !checked;
+                                                  });
+                                                },
+                                                child: Icon(
+                                                  checked == false
+                                                      ? Icons.visibility
+                                                      : Icons.visibility_off,
+                                                ),
+                                              ),
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 35),
+
+                                  // زر تسجيل الدخول
+                                  SizedBox(
+                                    height: 60,
+                                    width: screenWidth * 0.6,
+                                    child: FloatingActionButton(
+                                      backgroundColor: Color.fromARGB(
+                                        255,
+                                        130,
+                                        178,
+                                        61,
+                                      ),
+                                      elevation: 20,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      onPressed: () async {
+                                        final user = await _Signin(
+                                          nameController.text,
+                                          emailController.text,
+                                          passwordController.text,
+                                        );
+                                        if (user == null) {
+                                          return;
+                                        }
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) => const NavBarPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: const [
+                                          Icon(
+                                            Icons.login,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Login",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                            ),
+                                            // TODO : make a button to the Signup page Login() component
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 30),
+
+                                  // Google & Apple login
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [],
+                                    ),
+                                  ),
+                                ],
+                              ),
                     ),
                   ],
                 ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // النموذج داخل ستاك
-            Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Container(
-                    height: isSmall ? screenHeight * 0.7 : 520,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: theme.cardColor,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 30.0),
-                  child: Column(
-                    children: [
-                      // الاسم
-                      customInputField(
-                        controller: nameController,
-                        hint: "Enter your Name",
-                        width: inputWidth,
-                        theme: theme,
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // البريد الإلكتروني
-                      customInputField(
-                        controller: emailController,
-                        hint: "Enter your email",
-                        width: inputWidth,
-                        theme: theme,
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // كلمة المرور
-                      customInputField(
-                        controller: passwordController,
-                        hint: "Enter your password",
-                        width: inputWidth,
-                        theme: theme,
-                        obscure: true,
-                      ),
-
-                      const SizedBox(height: 35),
-
-                      // زر تسجيل الدخول
-                      SizedBox(
-                        height: 60,
-                        width: screenWidth * 0.6,
-                        child: FloatingActionButton(
-                          backgroundColor: Colors.black,
-                          elevation: 20,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          onPressed: () async {
-                            final user = await _Signup(
-                              nameController.text,
-                              emailController.text,
-                              passwordController.text,
-                            );
-                            if (user == null) {
-                              return;
-                            }
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const NavBarPage(),
-                              ),
-                            );
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.login, color: Colors.white),
-                              SizedBox(width: 8),
-                              Text(
-                                "Signup",
-                                // TODO : make a button to the Login in page Signup() component
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      // Google & Apple login
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ],
         ),
@@ -200,6 +514,7 @@ class _SignupState extends State<Signup> {
     required String hint,
     required double width,
     required ThemeData theme,
+    required Icon icon,
     bool obscure = false,
   }) {
     return SizedBox(
@@ -209,9 +524,12 @@ class _SignupState extends State<Signup> {
         obscureText: obscure,
         decoration: InputDecoration(
           hintText: hint,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(23)),
+          hoverColor: Colors.white,
+
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
           filled: true,
           fillColor: theme.inputDecorationTheme.fillColor ?? theme.cardColor,
+          icon: icon,
         ),
         style: TextStyle(color: theme.textTheme.bodyLarge?.color),
       ),

@@ -3,12 +3,13 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
+import 'package:task_team/Signup.dart';
 import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
 import 'dart:async';
 
 import 'package:task_team/main.dart';
-import 'package:task_team/Signin.dart';
+import 'package:task_team/profile.dart';
 
 class Splach extends StatefulWidget {
   const Splach({super.key});
@@ -35,7 +36,7 @@ class _SplachState extends State<Splach> {
         Timer(const Duration(seconds: 3), () async {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const Signin()),
+            MaterialPageRoute(builder: (context) => const Signup()),
           );
         });
         return;
@@ -49,7 +50,7 @@ class _SplachState extends State<Splach> {
       Timer(const Duration(seconds: 3), () async {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const NavBarPage()),
+          MaterialPageRoute(builder: (context) => NavBarPage()),
         );
       });
     });
