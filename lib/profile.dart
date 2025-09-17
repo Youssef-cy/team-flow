@@ -133,7 +133,7 @@ class _ProfileState extends State<Profile> {
                     ),
                     SizedBox(height: 12),
                     Text(
-                      "User Name ",
+                      "${user.name} ",
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                         fontSize: 20,
@@ -142,7 +142,7 @@ class _ProfileState extends State<Profile> {
                     ),
 
                     Text(
-                      "User email",
+                      "${user.email}",
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                         fontSize: 12,
@@ -165,10 +165,15 @@ class _ProfileState extends State<Profile> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8.0),
-                  child: Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.white,
-                    size: 20,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),

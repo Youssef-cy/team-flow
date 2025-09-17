@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
+import 'package:task_team/UserProvider.dart';
 import 'package:task_team/main.dart';
 
 class Signup extends StatefulWidget {
@@ -21,10 +23,6 @@ class _SignupState extends State<Signup> {
         email: email,
         password: password,
       );
-      await supabase.from('profiles').insert({
-        'user_id': response.user!.id,
-        'full_name': name,
-      });
 
       return response.user!;
     } catch (e) {
@@ -61,7 +59,6 @@ class _SignupState extends State<Signup> {
       });
 
       return response.user!;
-      
     } catch (e) {
       if (e is AuthWeakPasswordException) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -95,6 +92,7 @@ class _SignupState extends State<Signup> {
     final screenHeight = MediaQuery.of(context).size.height;
     final inputWidth = screenWidth * 0.85;
     final theme = Theme.of(context);
+    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -147,7 +145,7 @@ class _SignupState extends State<Signup> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 height: 35,
-                                width: 150,
+                                width: 140,
                                 child: Padding(
                                   padding: const EdgeInsets.only(
                                     left: 45.0,
@@ -183,7 +181,7 @@ class _SignupState extends State<Signup> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 height: 35,
-                                width: 150,
+                                width: 140,
                                 child: Padding(
                                   padding: const EdgeInsets.only(
                                     left: 45.0,
@@ -322,6 +320,10 @@ class _SignupState extends State<Signup> {
                                         if (user == null) {
                                           return;
                                         }
+                                        userProvider.addUser(
+                                          user.email!,
+                                          user.id,
+                                        );
                                         Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
@@ -449,6 +451,10 @@ class _SignupState extends State<Signup> {
                                         if (user == null) {
                                           return;
                                         }
+                                        userProvider.addUser(
+                                          user.email!,
+                                          user.id,
+                                        );
                                         Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(

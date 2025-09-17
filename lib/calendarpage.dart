@@ -14,17 +14,24 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   int selected = 0;
   final TextEditingController taskController = TextEditingController();
+  final TextEditingController subtaskController = TextEditingController();
 
   Future<Task> _addTask(String taskTitle, String? subTask) async {
+    print("subtask ${subTask}");
     var random = Random();
     final int id = random.nextInt(100000);
     final date = DateTime.timestamp();
-    final Task task = Task(taskName: taskTitle, id: id, updatedAt: date);
+    final Task task = Task(
+      taskName: taskTitle,
+      id: id,
+      updatedAt: date,
+      subTask: subTask == null ? null : subTask,
+    );
     final response = await supabase.from("tasks").insert({
       "user_id": supabase.auth.currentUser!.id,
       "id": id,
       "task_name": taskTitle,
-      "sub_task": subTask == null ? subTask : null,
+      "sub_task": subTask == null ? null : subTask,
       "updated_at": date.toString(),
     });
     print(response.toString());
@@ -50,38 +57,74 @@ class _CalendarPageState extends State<CalendarPage> {
                 fontSize: isTablet ? 22 : 18,
               ),
             ),
-            content: TextField(
-              controller: taskController,
-              decoration: const InputDecoration(
-                hintText: "Enter task title",
-                border: OutlineInputBorder(),
+            content: SingleChildScrollView(
+              child: SizedBox(
+                width: isTablet ? 400 : double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: taskController,
+                      decoration: const InputDecoration(
+                        hintText: "Enter task title",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: subtaskController,
+                      decoration: const InputDecoration(
+                        hintText: "Enter subtask title",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            ),
+            actionsPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
             ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   taskController.clear();
+                  subtaskController.clear();
                 },
-                child: const Text("Cancel"),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.grey),
+                ),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 onPressed: () async {
-                  if (taskController.text.isNotEmpty) {
-                    final task = await _addTask(taskController.text, null);
+                  if (taskController.text.trim().isNotEmpty) {
+                    final task = await _addTask(
+                      taskController.text.trim(),
+                      subtaskController.text.trim(),
+                    );
                     setState(() {
-                      Provider.of<TaskProvider>(context, listen: false).addTask(
-                        task,
-                      ); // this is how u add a task u make a task object then pass it to this method
+                      Provider.of<TaskProvider>(
+                        context,
+                        listen: false,
+                      ).addTask(task);
                     });
                     Navigator.pop(context);
                     taskController.clear();
+                    subtaskController.clear();
                   }
                 },
                 child: const Text("Add"),
@@ -91,11 +134,26 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
+  List<Task> filteredTasks(List<Task> tasks) {
+    List<Task> filtered_tasks = [];
+    tasks.map(
+      (task) => {
+        if (task.isCompleted == true) {filtered_tasks.add(task)},
+      },
+    );
+    return filtered_tasks;
+  }
+
   @override
   Widget build(BuildContext context) {
     final taskProvider = Provider.of<TaskProvider>(context);
     final List<Task> tasksToDisplay =
-        taskProvider.tasks; // this is the tasks every task is Task object
+        selected == 0
+            ? taskProvider.tasks.where((t) => t.isCompleted == true).toList()
+            : taskProvider.tasks
+                .where((task) => task.isCompleted == false)
+                .toList();
+
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
 
@@ -141,102 +199,6 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
           const SizedBox(height: 20),
 
-          // Tasks List
-          //          Expanded(
-          //            child:
-          //                tasksToDisplay.isEmpty
-          //                    ? Center(
-          //                      child: Text(
-          //                        "No tasks available",
-          //                        style: TextStyle(
-          //                          color: Colors.grey,
-          //                          fontSize: isTablet ? 20 : 16,
-          //                        ),
-          //                      ),
-          //                    )
-          //                    : ListView.builder(
-          //                      padding: EdgeInsets.symmetric(
-          //                        horizontal: isTablet ? 40 : 20,
-          //                      ),
-          //                      itemCount: tasksToDisplay.length,
-          //                      itemBuilder: (context, index) {
-          //                        final task = tasksToDisplay[index];
-          //                        return Container(
-          //                          margin: const EdgeInsets.only(bottom: 16),
-          //                          padding: EdgeInsets.all(isTablet ? 20 : 16),
-          //                          decoration: BoxDecoration(
-          //                            color: Colors.white,
-          //                            borderRadius: BorderRadius.circular(16),
-          //                            boxShadow: [
-          //                              BoxShadow(
-          //                                color: Colors.black.withOpacity(0.05),
-          //                                blurRadius: 8,
-          //                                offset: const Offset(0, 4),
-          //                              ),
-          //                            ],
-          //                          ),
-          //                          child: Column(
-          //                            crossAxisAlignment: CrossAxisAlignment.start,
-          //                            children: [
-          //                              Text(
-          //                                task.taskName,
-          //                                style: TextStyle(
-          //                                  fontSize: isTablet ? 18 : 16,
-          //                                  fontWeight: FontWeight.bold,
-          //                                ),
-          //                              ),
-          //                              const SizedBox(height: 12),
-          //                              ...task.map<Widget>((item) {
-          //                                return InkWell(
-          //                                  onTap: () {
-          //                                    setState(() {
-          //                                      item['isCompleted'] =
-          //                                          !item['isCompleted'];
-          //                                    });
-          //                                  },
-          //                                  child: Padding(
-          //                                    padding: const EdgeInsets.symmetric(
-          //                                      vertical: 6,
-          //                                    ),
-          //                                    child: Row(
-          //                                      children: [
-          //                                        Icon(
-          //                                          item['isCompleted']
-          //                                              ? Icons.check_circle
-          //                                              : Icons.radio_button_unchecked,
-          //                                          color:
-          //                                              item['isCompleted']
-          //                                                  ? Colors.green
-          //                                                  : Colors.grey,
-          //                                          size: isTablet ? 26 : 22,
-          //                                        ),
-          //                                        const SizedBox(width: 8),
-          //                                        Text(
-          //                                          item['name'],
-          //                                          style: TextStyle(
-          //                                            fontSize: isTablet ? 16 : 14,
-          //                                            color:
-          //                                                item['isCompleted']
-          //                                                    ? Colors.black87
-          //                                                    : Colors.black54,
-          //                                            decoration:
-          //                                                item['isCompleted']
-          //                                                    ? TextDecoration.lineThrough
-          //                                                    : TextDecoration.none,
-          //                                          ),
-          //                                        ),
-          //                                      ],
-          //                                    ),
-          //                                  ),
-          //                                );
-          //                              }).toList(),
-          //                            ],
-          //                          ),
-          //                        );
-          //                      },
-          //                    ),
-          //          ),
-          //
           Expanded(
             child:
                 tasksToDisplay.isEmpty
@@ -272,14 +234,20 @@ class _CalendarPageState extends State<CalendarPage> {
                             ],
                           ),
                           child: InkWell(
-                            onTap: () {
+                            onTap: () async {
                               setState(() {
-                                task.isCompleted = !task.isCompleted;
+                                taskProvider.toggleTaskCompletion(task.id);
                                 task.updatedAt =
                                     DateTime.now(); // Optional: update timestamp
                               });
+                              final res = await supabase
+                                  .from("tasks")
+                                  .update({"is_completed": task.isCompleted})
+                                  .eq("id", task.id);
+                              print(res.toString());
                             },
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Icon(
                                   task.isCompleted
@@ -292,21 +260,43 @@ class _CalendarPageState extends State<CalendarPage> {
                                   size: isTablet ? 26 : 22,
                                 ),
                                 const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    task.taskName,
-                                    style: TextStyle(
-                                      fontSize: isTablet ? 16 : 14,
-                                      color:
-                                          task.isCompleted
-                                              ? Colors.black87
-                                              : Colors.black54,
-                                      decoration:
-                                          task.isCompleted
-                                              ? TextDecoration.lineThrough
-                                              : TextDecoration.none,
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      task.taskName,
+                                      style: TextStyle(
+                                        fontSize: isTablet ? 16 : 14,
+                                        color:
+                                            task.isCompleted
+                                                ? Colors.black87
+                                                : Colors.black54,
+                                        decoration:
+                                            task.isCompleted
+                                                ? TextDecoration.lineThrough
+                                                : TextDecoration.none,
+                                      ),
                                     ),
-                                  ),
+                                    task.subTask == null
+                                        ? SizedBox()
+                                        : Text(
+                                          task.subTask == null
+                                              ? ""
+                                              : task.subTask!,
+                                          style: TextStyle(
+                                            fontSize: isTablet ? 16 : 14,
+                                            color:
+                                                task.isCompleted
+                                                    ? Colors.black87
+                                                    : Colors.black54,
+                                            decoration:
+                                                task.isCompleted
+                                                    ? TextDecoration.lineThrough
+                                                    : TextDecoration.none,
+                                          ),
+                                        ),
+                                  ],
                                 ),
                               ],
                             ),

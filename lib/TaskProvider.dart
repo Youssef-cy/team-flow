@@ -47,6 +47,7 @@ class TaskProvider with ChangeNotifier {
       // Convert each map to a Task object
       _tasks.addAll(
         response.map<Task>((task) {
+          print(task["id"]);
           return Task(
             taskName: task["task_name"] ?? '',
             id: task["id"],
@@ -71,7 +72,8 @@ class TaskProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleTaskCompletion(String id) {
+  void toggleTaskCompletion(int id) {
+    print(id);
     final task = _tasks.firstWhere((t) => t.id == id);
     task.isCompleted = !task.isCompleted;
     notifyListeners();

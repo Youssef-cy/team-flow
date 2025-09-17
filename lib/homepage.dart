@@ -201,10 +201,12 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           SizedBox(height: isTablet ? 10 : 8),
-          Text(
-            subtitle,
-            style: TextStyle(fontSize: (isTablet ? 16 : 14) * textScale),
-          ),
+          subtitle == ""
+              ? SizedBox()
+              : Text(
+                subtitle,
+                style: TextStyle(fontSize: (isTablet ? 16 : 14) * textScale),
+              ),
           SizedBox(height: isTablet ? 16 : 12),
           Text(footer, style: const TextStyle(color: Colors.black54)),
         ],

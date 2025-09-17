@@ -38,7 +38,7 @@ class _AddPageState extends State<AddPage> {
               const SizedBox(height: 40),
               const Center(
                 child: Text(
-                  'Create New Project',
+                  'Create New Shared Task',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -48,10 +48,7 @@ class _AddPageState extends State<AddPage> {
               ),
               const SizedBox(height: 30),
 
-              const Text(
-                'Project Name *',
-                style: TextStyle(color: Colors.black),
-              ),
+              const Text('Task Name *', style: TextStyle(color: Colors.black)),
               const SizedBox(height: 8),
               TextField(
                 controller: _projectNameController,
@@ -66,7 +63,7 @@ class _AddPageState extends State<AddPage> {
 
               const SizedBox(height: 16),
               const Text(
-                'Project Description',
+                'Task Description',
                 style: TextStyle(color: Colors.black),
               ),
               const SizedBox(height: 8),
@@ -166,7 +163,7 @@ class _AddPageState extends State<AddPage> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: const Text(
-                      'Create Project',
+                      'Create Shared Task',
                       style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
