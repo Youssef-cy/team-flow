@@ -8,7 +8,6 @@ import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
 import 'dart:async';
 import 'package:task_team/main.dart';
-import 'package:task_team/profile.dart';
 
 class Splach extends StatefulWidget {
   const Splach({super.key});
@@ -31,14 +30,6 @@ class _SplachState extends State<Splach> {
       final user = getUser();
 
       if (user == null) {
-<<<<<<< HEAD
-        // Navigate to Signin after 3 seconds
-        await Future.delayed(const Duration(seconds: 3));
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const Signin()),
-=======
         Timer(const Duration(seconds: 3), () async {
           Navigator.pushReplacement(
             context,
@@ -57,10 +48,9 @@ class _SplachState extends State<Splach> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => NavBarPage()),
->>>>>>> 11e4318174532e5b470ec5c532c1be06487a3940
         );
         return;
-      }
+      });
 
       // Load tasks and user data
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
