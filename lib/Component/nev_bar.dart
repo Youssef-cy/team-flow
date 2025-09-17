@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_team/AddPage.dart';
 import 'package:task_team/calendarpage.dart';
-import 'package:task_team/chatpage.dart';
 import 'package:task_team/folders.dart';
 import 'package:task_team/homepage.dart';
 
@@ -18,7 +17,6 @@ class _NavBarPageState extends State<NavBarPage> {
   final List<Widget> _pages = [
     const HomePage(),
     const CalendarPage(),
-    const ChatPage(),
     const FolderPage(),
     const AddPage(),
   ];
@@ -66,10 +64,7 @@ class _NavBarPageState extends State<NavBarPage> {
                 icon: Icon(Icons.calendar_month, size: iconSize),
                 label: 'calendar',
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.chat, size: iconSize),
-                label: 'chat',
-              ),
+
               BottomNavigationBarItem(
                 icon: Icon(Icons.notifications, size: iconSize),
                 label: 'notifications',

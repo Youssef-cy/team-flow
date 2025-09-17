@@ -14,15 +14,42 @@ class _AddPageState extends State<AddPage> {
 
   int selectedMembers = 2;
   List<String> addedEmails = [];
+  Map<String, TextEditingController> tasksControllers = {};
+  String? emailError; // عشان يظهر الميسج لو الإيميل غلط
+
+  // دالة للتحقق من صحة الإيميل
+  bool isValidEmail(String email) {
+    // regex بسيط للتحقق من صيغة الايميل
+    final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
+    return emailRegex.hasMatch(email);
+  }
 
   void addEmail() {
-    if (_emailController.text.isNotEmpty &&
-        !addedEmails.contains(_emailController.text)) {
+    String email = _emailController.text.trim();
+    if (email.isEmpty) {
       setState(() {
-        addedEmails.add(_emailController.text);
-        _emailController.clear();
+        emailError = "Please enter an email";
       });
+      return;
+    } else if (!isValidEmail(email)) {
+      setState(() {
+        emailError = "Invalid email format";
+      });
+      return;
+    } else if (addedEmails.contains(email)) {
+      setState(() {
+        emailError = "This email is already added";
+      });
+      return;
     }
+
+    // لو صح
+    setState(() {
+      addedEmails.add(email);
+      tasksControllers[email] = TextEditingController();
+      _emailController.clear();
+      emailError = null; // نخفي الغلط
+    });
   }
 
   @override
@@ -48,7 +75,11 @@ class _AddPageState extends State<AddPage> {
               ),
               const SizedBox(height: 30),
 
-              const Text('Task Name *', style: TextStyle(color: Colors.black)),
+              // ===== Project Name =====
+              const Text(
+                'Project Name *',
+                style: TextStyle(color: Colors.black),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _projectNameController,
@@ -86,7 +117,6 @@ class _AddPageState extends State<AddPage> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<int>(
-                // ignore: deprecated_member_use
                 value: selectedMembers,
                 items:
                     List.generate(10, (index) => index + 1)
@@ -120,6 +150,7 @@ class _AddPageState extends State<AddPage> {
                       controller: _emailController,
                       decoration: InputDecoration(
                         hintText: 'example@email.com',
+                        errorText: emailError, // لو فيه غلط هيظهر هنا
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -131,7 +162,7 @@ class _AddPageState extends State<AddPage> {
                     onPressed: addEmail,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
-                      elevation: 20,
+                      elevation: 5,
                     ),
                     child: const Text(
                       'Add +',
@@ -141,11 +172,55 @@ class _AddPageState extends State<AddPage> {
                 ],
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
+              // ===== Emails Cards =====
               ...addedEmails.map(
-                (email) => Text(
-                  '- $email',
-                  style: const TextStyle(color: Colors.black),
+                (email) => Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: Colors.black,
+                              child: Text(
+                                email[0].toUpperCase(),
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                email,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: tasksControllers[email],
+                          decoration: InputDecoration(
+                            hintText: 'Enter task for $email',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
 
@@ -155,7 +230,10 @@ class _AddPageState extends State<AddPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Project creation logic goes here
+                      // تطبع كل التاسكات الخاصة باليوزرز
+                      for (var email in addedEmails) {
+                        print('$email => ${tasksControllers[email]?.text}');
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
