@@ -36,6 +36,15 @@ class _SignupState extends State<Signup> {
             content: Text("⚠ Password too weak (must be 6+ characters)"),
           ),
         );
+      } else if (e is AuthRetryableFetchException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Your connection is unstable. Please try again later",
+            ),
+          ),
+        );
+        return null;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Unexpected error: ${e.toString()}")),
@@ -71,6 +80,15 @@ class _SignupState extends State<Signup> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("❌ Account already exists with this email"),
+          ),
+        );
+        return null;
+      } else if (e is AuthRetryableFetchException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Your connection is unstable. Please try again later",
+            ),
           ),
         );
         return null;

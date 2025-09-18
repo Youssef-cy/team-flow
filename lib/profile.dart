@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:task_team/Signup.dart';
+import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
 import 'package:task_team/main.dart';
 
@@ -58,6 +59,7 @@ class _ProfileState extends State<Profile> {
     final isTablet = size.width > 600;
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
+    final taskProvider = Provider.of<TaskProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -298,6 +300,7 @@ class _ProfileState extends State<Profile> {
                       onTap: () {
                         setState(() async {
                           await supabase.auth.signOut();
+                          taskProvider.cleartasks();
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => Signup()),

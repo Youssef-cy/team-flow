@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
+import 'package:task_team/main.dart';
 import 'package:task_team/profile.dart';
 import 'package:provider/provider.dart';
 
@@ -18,14 +19,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final taskprovider = Provider.of<TaskProvider>(context);
     final List<Task> tasks = taskprovider.tasks;
-    final List<Task> orgTasks = [];
-    final currentTasks = selected == 0 ? orgTasks : tasks;
-
     // أبعاد الشاشة
     final size = MediaQuery.of(context).size;
     final isTablet = size.width > 600;
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
+
+    final currentTasks = selected == 0 ? taskprovider.sharedTasks : tasks;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: LayoutBuilder(
@@ -109,6 +110,7 @@ class _HomePageState extends State<HomePage> {
 
                 // Cards
                 ...currentTasks.map((task) {
+                  print(task.taskName);
                   final localDate = task.updatedAt!.toLocal();
 
                   final hour12 =

@@ -30,37 +30,29 @@ class _SplachState extends State<Splach> {
       final user = getUser();
 
       if (user == null) {
-        Timer(const Duration(seconds: 3), () async {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Signup()),
-          );
-        });
-        return;
-      }
-      await Provider.of<TaskProvider>(context, listen: false).FillTasks();
-      await Provider.of<UserProvider>(
-        context,
-        listen: false,
-      ).addUser(user.email!, user.id);
-      // After tasks are loaded, wait 3 seconds and then navigate
-      Timer(const Duration(seconds: 3), () async {
+        // If no user, go to Signup after 3 seconds
+        await Future.delayed(const Duration(seconds: 3));
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => NavBarPage()),
+          MaterialPageRoute(builder: (context) => const Signup()),
         );
         return;
-      });
+      }
 
-      // Load tasks and user data
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      await taskProvider.FillTasks();
-      await userProvider.addUser(user.email!, user.id);
+      // Wait for BOTH async calls to complete
+      await Future.wait([
+        taskProvider.FillTasks(),
+        userProvider.addUser(user.email!, user.id),
+        taskProvider.AddingOrgaTasks(),
+      ]);
 
-      // Navigate to main page after loading
+      // Wait an extra 3 seconds if you want a splash screen effect
       await Future.delayed(const Duration(seconds: 3));
+
       if (!mounted) return;
       Navigator.pushReplacement(
         context,

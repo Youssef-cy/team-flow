@@ -1,4 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:task_team/TaskProvider.dart';
+import 'package:task_team/UserProvider.dart';
+import 'package:task_team/main.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -54,6 +60,10 @@ class _AddPageState extends State<AddPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.user;
+    final taskProvider = Provider.of<TaskProvider>(context);
+    final tasks = taskProvider.sharedTasks;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -76,10 +86,7 @@ class _AddPageState extends State<AddPage> {
               const SizedBox(height: 30),
 
               // ===== Project Name =====
-              const Text(
-                'Project Name *',
-                style: TextStyle(color: Colors.black),
-              ),
+              const Text('Task Name *', style: TextStyle(color: Colors.black)),
               const SizedBox(height: 8),
               TextField(
                 controller: _projectNameController,
@@ -104,33 +111,6 @@ class _AddPageState extends State<AddPage> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-              const Text(
-                'Number of Members',
-                style: TextStyle(color: Colors.black),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<int>(
-                value: selectedMembers,
-                items:
-                    List.generate(10, (index) => index + 1)
-                        .map(
-                          (num) =>
-                              DropdownMenuItem(value: num, child: Text('$num')),
-                        )
-                        .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedMembers = value ?? 2;
-                  });
-                },
-                decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -208,16 +188,6 @@ class _AddPageState extends State<AddPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: tasksControllers[email],
-                          decoration: InputDecoration(
-                            hintText: 'Enter task for $email',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -229,10 +199,60 @@ class _AddPageState extends State<AddPage> {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // تطبع كل التاسكات الخاصة باليوزرز
-                      for (var email in addedEmails) {
-                        print('$email => ${tasksControllers[email]?.text}');
+                    onPressed: () async {
+                      try {
+                        var random = Random();
+                        final date = DateTime.timestamp();
+                        final int id = random.nextInt(100000);
+                        // تطبع كل التاسكات الخاصة باليوزرز
+                        final data =
+                            await supabase.from("tasks").insert({
+                              "user_id": user!.id,
+                              "id": id,
+                              "task_name": _projectNameController.text,
+                              "sub_task": _projectDescController.text,
+                              "updated_at": date.toString(),
+                            }).select();
+
+                        await supabase.from("shared_task").insert({
+                          "user_id": user.id,
+                          "task_id": data[0]["id"],
+                        });
+
+                        print(data.toString());
+
+                        taskProvider.OrgaddTask(
+                          Task(
+                            taskName: _projectNameController.text,
+                            id: id,
+                            subTask: _projectDescController.text,
+                            updatedAt: date,
+                          ),
+                        );
+
+                        print("1 ${data.toString()}");
+
+                        for (var email in addedEmails) {
+                          print('$email => ${tasksControllers[email]?.text}');
+                          final userEmail = await supabase.functions.invoke(
+                            'dynamic-action',
+                            body: {'email': '${email}'},
+                          );
+
+                          print("2 ${userEmail}");
+                          final userid = userEmail.data;
+                          if (userid["exists"] == false) {
+                            continue;
+                          }
+
+                          await supabase.from("shared_task").insert({
+                            "user_id": userid["user"]["id"],
+                            "task_id": data[0]["id"],
+                          });
+                          print("3");
+                        }
+                      } catch (e) {
+                        print(e.toString());
                       }
                     },
                     style: ElevatedButton.styleFrom(
