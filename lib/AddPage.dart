@@ -249,7 +249,9 @@ class _AddPageState extends State<AddPage> {
                             "task_id": data[0]["id"],
                           });
                           print("3");
+                        
                         }
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>nev));
                       } catch (e) {
                         print(e.toString());
                       }
