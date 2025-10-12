@@ -12,6 +12,7 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
+  // TODO: make a validation for the task input 
   int selected = 0;
   final TextEditingController taskController = TextEditingController();
   final TextEditingController subtaskController = TextEditingController();

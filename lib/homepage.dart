@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // FIll all the tasks from the database to be displayed
+    // FIll all the tasks from the database to be displayedx
     WidgetsBinding.instance.addPostFrameCallback((_) async {
 
 
