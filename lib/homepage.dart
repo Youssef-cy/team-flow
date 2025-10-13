@@ -157,6 +157,11 @@ class _HomePageState extends State<HomePage> {
                       ? 12
                       : localDate.hour % 12;
                   final period = localDate.hour >= 12 ? "PM" : "AM";
+                  String? email = "By you";
+                  if (task.email == null ){
+                    email = "By you";
+                  }
+                  email = task.email;
 
                   // Build formatted string
                   final formatted =
@@ -165,7 +170,9 @@ class _HomePageState extends State<HomePage> {
                       "${localDate.day.toString().padLeft(2, '0')}    "
                       "${hour12.toString().padLeft(2, '0')}:"
                       "${localDate.minute.toString().padLeft(2, '0')}"
-                      " $period";
+                      " $period"
+                      " \n${email==null ? "Made By you" : email}"
+                      ;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 15),
                     child: _buildCard(
@@ -224,6 +231,7 @@ class _HomePageState extends State<HomePage> {
     required String footer,
     required bool isTablet,
     required double textScale,
+    String? owner
   }) {
     return Container(
       width: double.infinity,

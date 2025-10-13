@@ -7,11 +7,15 @@ class Task {
   String? subTask;
   DateTime? updatedAt;
   bool isCompleted;
+  bool shared;
+  String? email;
   Task({
     required this.taskName,
     this.updatedAt,
     this.subTask,
     this.isCompleted = false,
+    required this.shared,
+    this.email,
     required this.id,
   });
 }
@@ -47,20 +51,33 @@ class TaskProvider with ChangeNotifier {
       _tasks.clear();
 
       // Convert each map to a Task object
-      _tasks.addAll(
-        response.map<Task>((task) {
-          print(task["id"]);
+      
+      var rpcResponse ;
+      final tasks = await Future.wait(
+        response.map((task) async {
+          if (task["shared"] == true) {
+            rpcResponse = await supabase.rpc(
+              'get_task_owner',
+              params: {'p_task_id': task["id"]},
+            );
+            print('Owner: $rpcResponse');
+          }
+
           return Task(
             taskName: task["task_name"] ?? '',
             id: task["id"],
             subTask: task["sub_task"],
             updatedAt: DateTime.parse(task["updated_at"]),
             isCompleted: task["is_completed"] ?? false,
+            shared: task["shared"],
+            email: "Made by you"
           );
-        }).toList(),
+        }),
       );
 
-      if (_tasks.isEmpty){
+      _tasks.addAll(tasks);
+
+      if (_tasks.isEmpty) {
         print("There is no tasks for this user");
         return null;
       }
@@ -69,7 +86,6 @@ class TaskProvider with ChangeNotifier {
       notifyListeners();
       print("Tasks updated. Total: ${_tasks.length}");
       return true;
-
     } catch (error) {
       print("Error fetching tasks: $error");
       return false;
@@ -137,19 +153,35 @@ class TaskProvider with ChangeNotifier {
       }
 
       print("🔹 Parsing tasks...");
-      final parsedTasks =
-          res.map<Task>((t) {
-            final taskData = t['tasks'];
-            print("📌 Mapping shared_task row: $t");
 
-            return Task(
-              taskName: taskData["task_name"],
-              id: taskData["id"],
-              subTask: taskData["sub_task"],
-              updatedAt: DateTime.parse(taskData["updated_at"]),
-              isCompleted: taskData["is_completed"] ?? false,
+
+      var rpcResponse ;
+      final tasks = await Future.wait(
+        res.map((task) async {
+          if (task["tasks"]["shared"] == true) {
+            rpcResponse = await supabase.rpc(
+              'get_task_owner',
+              params: {'p_task_id': task["id"]},
             );
-          }).toList();
+            print('Owner: $rpcResponse');
+          }
+
+          return Task(
+            taskName: task["tasks"]["task_name"] ?? '',
+            id: task["tasks"]["id"],
+            subTask: task["tasks"]["sub_task"],
+            updatedAt: DateTime.parse(task["tasks"]["updated_at"]),
+            isCompleted: task["tasks"]["is_completed"] ?? false,
+            shared: task["tasks"]["shared"],
+            email: rpcResponse
+          );
+        }),
+      );
+
+
+
+
+      final parsedTasks = tasks;
 
       print("✅ Parsed ${parsedTasks.length} tasks successfully.");
 

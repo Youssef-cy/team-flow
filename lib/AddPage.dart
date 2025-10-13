@@ -19,6 +19,9 @@ class _AddPageState extends State<AddPage> {
   final TextEditingController _projectNameController = TextEditingController();
   final TextEditingController _projectDescController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  bool _isLoading = false;
+
+
 
   int selectedMembers = 2;
   List<String> addedEmails = [];
@@ -62,6 +65,14 @@ class _AddPageState extends State<AddPage> {
 
   @override
   Widget build(BuildContext context) {
+
+
+    if (_isLoading == true){
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
     final taskProvider = Provider.of<TaskProvider>(context);
@@ -202,22 +213,26 @@ class _AddPageState extends State<AddPage> {
                   child: ElevatedButton(
                     onPressed: () async {
                       try {
+                        setState(() {
+                          _isLoading = true;
+                        });
                         var random = Random();
                         final date = DateTime.timestamp();
                         final int id = random.nextInt(100000);
                         // تطبع كل التاسكات الخاصة باليوزرز
-                        final data =
-                            await supabase.from("tasks").insert({
-                              "user_id": user!.id,
-                              "id": id,
-                              "task_name": _projectNameController.text,
-                              "sub_task": _projectDescController.text,
-                              "updated_at": date.toString(),
-                            }).select();
+                        final data = await supabase.from("tasks").insert({
+                          "user_id": user!.id,
+                          "id": id,
+                          "task_name": _projectNameController.text,
+                          "sub_task": _projectDescController.text,
+                          "updated_at": date.toString(),
+                          "shared": true,
+                        }).select();
 
                         await supabase.from("shared_task").insert({
                           "user_id": user.id,
                           "task_id": data[0]["id"],
+                          "owner": true,
                         });
 
                         print(data.toString());
@@ -228,6 +243,8 @@ class _AddPageState extends State<AddPage> {
                             id: id,
                             subTask: _projectDescController.text,
                             updatedAt: date,
+                            shared: true,
+                            email: supabase.auth.currentUser!.email
                           ),
                         );
 
@@ -251,14 +268,19 @@ class _AddPageState extends State<AddPage> {
                             "task_id": data[0]["id"],
                           });
                           print("3");
-                        
                         }
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>
-                      NavBarPage(wid: HomePage())
-                    ));
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NavBarPage(wid: HomePage()),
+                          ),
+                        );
                       } catch (e) {
                         print(e.toString());
                       }
+                      setState(() {
+                      _isLoading = false;
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,

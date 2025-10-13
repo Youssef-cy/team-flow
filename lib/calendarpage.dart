@@ -18,6 +18,7 @@ class _CalendarPageState extends State<CalendarPage> {
   final TextEditingController subtaskController = TextEditingController();
 
   Future<Task> _addTask(String taskTitle, String? subTask) async {
+    print("$taskTitle and $subTask");
     print("subtask ${subTask}");
     var random = Random();
     final int id = random.nextInt(100000);
@@ -27,6 +28,7 @@ class _CalendarPageState extends State<CalendarPage> {
       id: id,
       updatedAt: date,
       subTask: subTask == null ? null : subTask,
+      shared: false
     );
     final response = await supabase.from("tasks").insert({
       "user_id": supabase.auth.currentUser!.id,
@@ -161,6 +163,7 @@ class _CalendarPageState extends State<CalendarPage> {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 1,
         title: Text(

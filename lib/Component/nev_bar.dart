@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:task_team/AddPage.dart';
+import 'package:task_team/calendarpage.dart';
+import 'package:task_team/folders.dart';
+import 'package:task_team/homepage.dart';
 
 class NavBarPage extends StatefulWidget {
   final Widget wid;
@@ -11,10 +14,28 @@ class NavBarPage extends StatefulWidget {
 
 class _NavBarPageState extends State<NavBarPage> {
   int _currentIndex = 0;
-
+  late Widget _currentWidget;
 
   @override
   Widget build(BuildContext context) {
+    // 👇 Switch between pages depending on index
+    switch (_currentIndex) {
+      case 0:
+        _currentWidget = const HomePage();
+        break;
+      case 1:
+        _currentWidget = const CalendarPage();
+        break;
+      case 2:
+        _currentWidget = const FolderPage();
+        break;
+      case 3:
+        _currentWidget = const AddPage();
+        break;
+    }
+
+    print("$_currentIndex");
+
     // معلومات الشاشة
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600; // لو أكبر من 600 يبقى تابلت أو ديسكتوب
@@ -26,7 +47,7 @@ class _NavBarPageState extends State<NavBarPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(child: this.widget.wid),
+      body: SafeArea(child: _currentWidget),
       bottomNavigationBar: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: isTablet ? 40 : 10,
