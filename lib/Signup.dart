@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:task_team/Component/nev_bar.dart';
 import 'package:task_team/UserProvider.dart';
+import 'package:task_team/homepage.dart';
 import 'package:task_team/main.dart';
 
 class Signup extends StatefulWidget {
@@ -221,7 +222,7 @@ class _SignupState extends State<Signup> {
                 userProvider.addUser(user.email!, user.id);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => const NavBarPage()),
+                  MaterialPageRoute(builder: (_) => const NavBarPage(wid: HomePage(),)),
                 );
               }
             }
@@ -290,7 +291,7 @@ class _SignupState extends State<Signup> {
                 userProvider.addUser(user.email!, user.id);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => const NavBarPage()),
+                  MaterialPageRoute(builder: (_) => const NavBarPage(wid: HomePage(),)),
                 );
               }
             }

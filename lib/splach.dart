@@ -6,6 +6,7 @@ import 'package:task_team/Component/nev_bar.dart';
 import 'package:task_team/Signup.dart';
 import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
+import 'package:task_team/homepage.dart';
 import 'dart:async';
 import 'package:task_team/main.dart';
 
@@ -56,7 +57,7 @@ class _SplachState extends State<Splach> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const NavBarPage()),
+        MaterialPageRoute(builder: (context) => const NavBarPage(wid: HomePage(),)),
       );
     });
   }

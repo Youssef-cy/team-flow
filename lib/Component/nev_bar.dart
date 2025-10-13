@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:task_team/AddPage.dart';
-import 'package:task_team/calendarpage.dart';
-import 'package:task_team/folders.dart';
-import 'package:task_team/homepage.dart';
+
 
 class NavBarPage extends StatefulWidget {
-  const NavBarPage({super.key});
+  final Widget wid;
+  const NavBarPage({super.key, required this.wid});
 
   @override
   State<NavBarPage> createState() => _NavBarPageState();
@@ -14,12 +12,6 @@ class NavBarPage extends StatefulWidget {
 class _NavBarPageState extends State<NavBarPage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const HomePage(),
-    const CalendarPage(),
-    const FolderPage(),
-    const AddPage(),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +26,7 @@ class _NavBarPageState extends State<NavBarPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(child: _pages[_currentIndex]),
+      body: SafeArea(child: this.widget.wid),
       bottomNavigationBar: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: isTablet ? 40 : 10,

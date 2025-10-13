@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
+import 'package:task_team/homepage.dart';
 import 'package:task_team/main.dart';
+import 'package:task_team/Component/nev_bar.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -251,7 +253,9 @@ class _AddPageState extends State<AddPage> {
                           print("3");
                         
                         }
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>nev));
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>
+                      NavBarPage(wid: HomePage())
+                    ));
                       } catch (e) {
                         print(e.toString());
                       }
