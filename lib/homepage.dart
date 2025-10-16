@@ -12,20 +12,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool _isLoading = true;
+  int selected = 0;
+  String searchQuery = "";
+  final TextEditingController _searchController = TextEditingController();
 
-  bool _isLoading = true ;
-
-
+  // ✅ ألوان مختلفة للتسكات
+  final List<Color> taskColors = [
+    Colors.orange,
+    Colors.red,
+    Colors.blue,
+    Colors.green,
+    Colors.purple,
+    Colors.teal,
+  ];
 
   @override
   void initState() {
-    // FIll all the tasks from the database to be displayedx
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-
-
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
 
-      if (taskProvider.sharedTasks.isNotEmpty && taskProvider.tasks.isNotEmpty){
+      if (taskProvider.sharedTasks.isNotEmpty &&
+          taskProvider.tasks.isNotEmpty) {
         setState(() => _isLoading = false);
         return;
       }
@@ -35,38 +44,32 @@ class _HomePageState extends State<HomePage> {
         taskProvider.AddingOrgaTasks(),
       ]);
 
-
       if (mounted) setState(() => _isLoading = false);
-
     });
-    super.initState();
   }
-
-  int selected = 0;
 
   @override
   Widget build(BuildContext context) {
-
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
-    // if we still fetching data we show a Loading screen
+
     if (_isLoading == true || user == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
-
-
-    // the tasks 
     final taskprovider = Provider.of<TaskProvider>(context);
     final List<Task> tasks = taskprovider.tasks;
 
-
-    // أبعاد الشاشة
     final size = MediaQuery.of(context).size;
     final isTablet = size.width > 600;
 
-
+    // 🧠 استخدم الليست الحالية
     final currentTasks = selected == 0 ? taskprovider.sharedTasks : tasks;
+
+    // 🔍 فلترة حسب السيرش
+    final filteredTasks = currentTasks.where((task) {
+      return task.taskName.toLowerCase().contains(searchQuery.toLowerCase());
+    }).toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -78,11 +81,11 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.all(isTablet ? 30 : 20),
             child: ListView(
               children: [
-                // Top Bar
+                // 🔝 Top Bar
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.grid_view_rounded, size: isTablet ? 40 : 30),
+                    Icon(Icons.sort, size: isTablet ? 40 : 30),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -96,27 +99,68 @@ class _HomePageState extends State<HomePage> {
                           ),
                         );
                       },
-                      child: CircleAvatar(
-                        radius: isTablet ? 30 : 20,
-                        backgroundImage: NetworkImage(user.profilePic!),
-                      ),
+                      child: Text("🔔", style: TextStyle(fontSize: 25)),
                     ),
                   ],
                 ),
-                // Top Bar
+
                 SizedBox(height: isTablet ? 40 : 25),
 
-                // Title
+                // 👋 Welcome user
+                Text("Hello ${user.name ?? ''}"),
+
+                // 📌 Title
                 Text(
-                  "Stay Updated on\nYour Schedule",
+                  "You Have\n${filteredTasks.length} Task Today",
                   style: TextStyle(
-                    fontSize: (isTablet ? 28 : 22) * textScale,
+                    fontSize: (isTablet ? 30 : 28) * textScale,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.start,
                 ),
+
                 SizedBox(height: isTablet ? 30 : 20),
 
-                // Tabs
+                // 🔍 Search bar
+                Container(
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.grey.shade500, size: 24),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          textAlignVertical: TextAlignVertical.center,
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.all(18),
+                            hintText: 'Search task..',
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 16,
+                            ),
+                            border: InputBorder.none,
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              searchQuery = value;
+                            });
+                          },
+                        ),
+                      ),
+                      Icon(Icons.tune, color: Colors.black, size: 24),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: isTablet ? 30 : 20),
+
+                // 🧭 Tabs
                 Container(
                   padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
@@ -130,9 +174,10 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
+
                 SizedBox(height: isTablet ? 35 : 25),
 
-                // Pending Requests
+                // ⏳ Pending Requests
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -143,40 +188,44 @@ class _HomePageState extends State<HomePage> {
                         fontSize: isTablet ? 20 : 16,
                       ),
                     ),
-                    Icon(Icons.refresh, size: isTablet ? 28 : 22),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {});
+                      },
+                      child: Icon(Icons.refresh, size: isTablet ? 28 : 22),
+                    ),
                   ],
                 ),
+
                 SizedBox(height: isTablet ? 25 : 15),
 
-                // Cards
-                ...currentTasks.map((task) {
-                  print(task.taskName);
+                // 🗂️ Cards
+                ...filteredTasks.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final task = entry.value;
+
                   final localDate = task.updatedAt!.toLocal();
 
-                  final hour12 = localDate.hour % 12 == 0
-                      ? 12
-                      : localDate.hour % 12;
+                  final hour12 =
+                      localDate.hour % 12 == 0 ? 12 : localDate.hour % 12;
                   final period = localDate.hour >= 12 ? "PM" : "AM";
-                  String? email = "By you";
-                  if (task.email == null ){
-                    email = "By you";
-                  }
-                  email = task.email;
 
-                  // Build formatted string
+                  String? email = task.email ?? "By you";
+
                   final formatted =
                       "${localDate.year}-"
                       "${localDate.month.toString().padLeft(2, '0')}-"
                       "${localDate.day.toString().padLeft(2, '0')}    "
-                      "${hour12.toString().padLeft(2, '0')}:"
-                      "${localDate.minute.toString().padLeft(2, '0')}"
-                      " $period"
-                      " \n${email==null ? "Made By you" : email}"
-                      ;
+                      "${hour12.toString().padLeft(2, '0')}:" // وقت
+                      "${localDate.minute.toString().padLeft(2, '0')} $period"
+                      "\n${email == null ? "Made By you" : email}";
+
+                  final color = taskColors[index % taskColors.length];
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 15),
                     child: _buildCard(
-                      color: Colors.red,
+                      color: color,
                       title: task.taskName,
                       subtitle: task.subTask ?? "",
                       footer: formatted,
@@ -190,8 +239,6 @@ class _HomePageState extends State<HomePage> {
           );
         },
       ),
-
-      // ✅ Floating Action Button
     );
   }
 
@@ -231,13 +278,11 @@ class _HomePageState extends State<HomePage> {
     required String footer,
     required bool isTablet,
     required double textScale,
-    String? owner
   }) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isTablet ? 24 : 18),
       decoration: BoxDecoration(
-        // ignore: deprecated_member_use
         color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -253,7 +298,7 @@ class _HomePageState extends State<HomePage> {
           ),
           SizedBox(height: isTablet ? 10 : 8),
           subtitle == ""
-              ? SizedBox()
+              ? const SizedBox()
               : Text(
                   subtitle,
                   style: TextStyle(fontSize: (isTablet ? 16 : 14) * textScale),

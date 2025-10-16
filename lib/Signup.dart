@@ -14,19 +14,16 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  // ✅ Controllers
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // ✅ Form key
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // ✅ UI states
   bool showPassword = false;
+  bool isLoading = false; // ✅ حالة التحميل
   int selected = 0; // 0 => signup, 1 => signin
 
-  // ✅ Supabase Auth methods
   Future<User?> _signin(String email, String password) async {
     try {
       final response = await supabase.auth.signInWithPassword(
@@ -73,11 +70,14 @@ class _SignupState extends State<Signup> {
       } else if (e is AuthApiException) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text("❌ Account already exists with this email")),
+            content: Text("❌ Account already exists with this email"),
+          ),
         );
       } else if (e is AuthRetryableFetchException) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("⚠️ Internet unstable, try again later")),
+          const SnackBar(
+            content: Text("⚠️ Internet unstable, try again later"),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -114,9 +114,8 @@ class _SignupState extends State<Signup> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-
-                    // ✅ Switch Buttons
                     Container(
+                      width: 300,
                       padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade200,
@@ -132,8 +131,6 @@ class _SignupState extends State<Signup> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // ✅ Form
                     Expanded(
                       child: Form(
                         key: _formKey,
@@ -152,7 +149,7 @@ class _SignupState extends State<Signup> {
     );
   }
 
-  // ✅ Sign Up form
+  // ✅ Sign Up Form
   Widget buildSignupForm(UserProvider userProvider, double screenWidth) {
     return Column(
       children: [
@@ -208,36 +205,53 @@ class _SignupState extends State<Signup> {
           style: ElevatedButton.styleFrom(
             minimumSize: Size(screenWidth * 0.6, 55),
             backgroundColor: const Color.fromARGB(255, 130, 178, 61),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
           ),
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              final user = await _signup(
-                nameController.text.trim(),
-                emailController.text.trim().toLowerCase(),
-                passwordController.text,
-              );
-              if (user != null) {
-                userProvider.addUser(user.email!, user.id);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const NavBarPage(wid: HomePage(),)),
-                );
-              }
-            }
-          },
-          icon: const Icon(Icons.person_add, color: Colors.white),
-          label: const Text(
-            "Sign Up",
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          onPressed: isLoading
+              ? null
+              : () async {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() => isLoading = true);
+                    final user = await _signup(
+                      nameController.text.trim(),
+                      emailController.text.trim().toLowerCase(),
+                      passwordController.text,
+                    );
+                    setState(() => isLoading = false);
+
+                    if (user != null) {
+                      userProvider.addUser(user.email!, user.id);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const Navbar(wid: HomePage()),
+                        ),
+                      );
+                    }
+                  }
+                },
+          icon: isLoading
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2.5,
+                  ),
+                )
+              : const Icon(Icons.person_add, color: Colors.white),
+          label: Text(
+            isLoading ? "Loading..." : "Sign Up",
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
         ),
       ],
     );
   }
 
-  // ✅ Sign In form
+  // ✅ Sign In Form
   Widget buildSigninForm(UserProvider userProvider, double screenWidth) {
     return Column(
       children: [
@@ -278,39 +292,59 @@ class _SignupState extends State<Signup> {
           style: ElevatedButton.styleFrom(
             minimumSize: Size(screenWidth * 0.6, 55),
             backgroundColor: const Color.fromARGB(255, 130, 178, 61),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
           ),
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              final user = await _signin(
-                emailController.text.trim().toLowerCase(),
-                passwordController.text,
-              );
-              if (user != null) {
-                userProvider.addUser(user.email!, user.id);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const NavBarPage(wid: HomePage(),)),
-                );
-              }
-            }
-          },
-          icon: const Icon(Icons.login, color: Colors.white),
-          label: const Text(
-            "Login",
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          onPressed: isLoading
+              ? null
+              : () async {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() => isLoading = true);
+                    final user = await _signin(
+                      emailController.text.trim().toLowerCase(),
+                      passwordController.text,
+                    );
+                    setState(() => isLoading = false);
+
+                    if (user != null) {
+                      userProvider.addUser(user.email!, user.id);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const Navbar(wid: HomePage()),
+                        ),
+                      );
+                    }
+                  }
+                },
+          icon: isLoading
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2.5,
+                  ),
+                )
+              : const Icon(Icons.login, color: Colors.white),
+          label: Text(
+            isLoading ? "Loading..." : "Login",
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
         ),
       ],
     );
   }
 
-  // ✅ Toggle buttons (switch signup/signin)
   Widget toggleButton(String text, int index) {
     final bool isSelected = selected == index;
     return GestureDetector(
-      onTap: () => setState(() => selected = index),
+      onTap: isLoading
+          ? null
+          : () => setState(() {
+                selected = index;
+              }),
       child: Container(
         width: 140,
         height: 40,
@@ -330,7 +364,6 @@ class _SignupState extends State<Signup> {
     );
   }
 
-  // ✅ Custom text field with validator
   Widget customInputField({
     required TextEditingController controller,
     required String hint,
@@ -346,7 +379,10 @@ class _SignupState extends State<Signup> {
         obscureText: obscureText,
         validator: validator,
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: const Color.fromARGB(255, 130, 178, 61)),
+          prefixIcon: Icon(
+            icon,
+            color: const Color.fromARGB(255, 130, 178, 61),
+          ),
           suffixIcon: suffix,
           hintText: hint,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),

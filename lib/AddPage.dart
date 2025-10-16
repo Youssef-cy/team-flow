@@ -272,7 +272,7 @@ class _AddPageState extends State<AddPage> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => NavBarPage(wid: HomePage()),
+                            builder: (context) => Navbar(wid: HomePage()),
                           ),
                         );
                       } catch (e) {

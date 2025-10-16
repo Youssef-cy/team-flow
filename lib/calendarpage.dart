@@ -13,6 +13,7 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   // TODO: make a validation for the task input 
+  bool _isLoading = true;
   int selected = 0;
   final TextEditingController taskController = TextEditingController();
   final TextEditingController subtaskController = TextEditingController();
@@ -43,99 +44,118 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void addTaskDialog() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+  final screenWidth = MediaQuery.of(context).size.width;
+  final isTablet = screenWidth > 600;
 
-    showDialog(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+  showDialog(
+    context: context,
+    builder: (_) => StatefulBuilder(
+      builder: (context, setStateDialog) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            "Add Task",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isTablet ? 22 : 18,
             ),
-            title: Text(
-              "Add Task",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: isTablet ? 22 : 18,
-              ),
-            ),
-            content: SingleChildScrollView(
-              child: SizedBox(
-                width: isTablet ? 400 : double.maxFinite,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: taskController,
-                      decoration: const InputDecoration(
-                        hintText: "Enter task title",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: subtaskController,
-                      decoration: const InputDecoration(
-                        hintText: "Enter subtask title",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actionsPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  taskController.clear();
-                  subtaskController.clear();
-                },
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () async {
-                  if (taskController.text.trim().isNotEmpty) {
-                    final task = await _addTask(
-                      taskController.text.trim(),
-                      subtaskController.text.trim(),
-                    );
-                    setState(() {
-                      Provider.of<TaskProvider>(
-                        context,
-                        listen: false,
-                      ).addTask(task);
-                    });
-                    Navigator.pop(context);
-                    taskController.clear();
-                    subtaskController.clear();
-                  }
-                },
-                child: const Text("Add"),
-              ),
-            ],
           ),
-    );
-  }
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: isTablet ? 400 : double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: taskController,
+                    decoration: const InputDecoration(
+                      hintText: "Enter task title",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: subtaskController,
+                    decoration: const InputDecoration(
+                      hintText: "Enter subtask title",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                taskController.clear();
+                subtaskController.clear();
+              },
+              child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: _isLoading
+                  ? null
+                  : () async {
+                      if (taskController.text.trim().isNotEmpty) {
+                        setStateDialog(() {
+                          _isLoading = true; // 👈 دي بقى بتأثر على الDialog
+                        });
+
+                        try {
+                          final task = await _addTask(
+                            taskController.text.trim(),
+                            subtaskController.text.trim(),
+                          );
+
+                          if (mounted) {
+                            Provider.of<TaskProvider>(
+                              context,
+                              listen: false,
+                            ).addTask(task);
+
+                            Navigator.pop(context);
+                            taskController.clear();
+                            subtaskController.clear();
+                          }
+                        } catch (e) {
+                          debugPrint("Error adding task: $e");
+                        } finally {
+                          if (mounted) {
+                            setStateDialog(() {
+                              _isLoading = false;
+                            });
+                          }
+                        }
+                      }
+                    },
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text("Add"),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
 
   List<Task> filteredTasks(List<Task> tasks) {
     List<Task> filtered_tasks = [];
