@@ -51,18 +51,9 @@ class TaskProvider with ChangeNotifier {
       _tasks.clear();
 
       // Convert each map to a Task object
-      
-      var rpcResponse ;
+
       final tasks = await Future.wait(
         response.map((task) async {
-          if (task["shared"] == true) {
-            rpcResponse = await supabase.rpc(
-              'get_task_owner',
-              params: {'p_task_id': task["id"]},
-            );
-            print('Owner: $rpcResponse');
-          }
-
           return Task(
             taskName: task["task_name"] ?? '',
             id: task["id"],
@@ -70,7 +61,7 @@ class TaskProvider with ChangeNotifier {
             updatedAt: DateTime.parse(task["updated_at"]),
             isCompleted: task["is_completed"] ?? false,
             shared: task["shared"],
-            email: "Made by you"
+            email: "Made by you",
           );
         }),
       );
@@ -144,7 +135,7 @@ class TaskProvider with ChangeNotifier {
           .select('task_id, tasks(*)')
           .eq('user_id', user.id);
 
-      print("📥 Raw response from Supabase:");
+      print("📥 Raw response from Supabase org :");
       print(res);
 
       if (res.isEmpty) {
@@ -154,32 +145,32 @@ class TaskProvider with ChangeNotifier {
 
       print("🔹 Parsing tasks...");
 
+      var rpcResponse;
+      final List<Task> tasks = [];
 
-      var rpcResponse ;
-      final tasks = await Future.wait(
-        res.map((task) async {
-          if (task["tasks"]["shared"] == true) {
-            rpcResponse = await supabase.rpc(
-              'get_task_owner',
-              params: {'p_task_id': task["id"]},
-            );
-            print('Owner: $rpcResponse');
-          }
+      for (final task in res) {
+        print("a single object in map ${task.toString()}");
 
-          return Task(
+        if (task["tasks"]["shared"] == true) {
+          rpcResponse = await supabase.rpc(
+            'get_task_owner',
+            params: {'p_task_id': task["task_id"]},
+          );
+          print('Owner: ${rpcResponse.toString()}');
+        }
+
+        tasks.add(
+          Task(
             taskName: task["tasks"]["task_name"] ?? '',
             id: task["tasks"]["id"],
             subTask: task["tasks"]["sub_task"],
             updatedAt: DateTime.parse(task["tasks"]["updated_at"]),
             isCompleted: task["tasks"]["is_completed"] ?? false,
             shared: task["tasks"]["shared"],
-            email: rpcResponse
-          );
-        }),
-      );
-
-
-
+            email: rpcResponse == supabase.auth.currentUser!.email! ? "Made by you" : rpcResponse,
+          ),
+        );
+      }
 
       final parsedTasks = tasks;
 
