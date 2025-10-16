@@ -66,6 +66,8 @@ class _HomePageState extends State<HomePage> {
     // 🧠 استخدم الليست الحالية
     final currentTasks = selected == 0 ? taskprovider.sharedTasks : tasks;
 
+    print("selected $selected");
+
     // 🔍 فلترة حسب السيرش
     final filteredTasks = currentTasks.where((task) {
       return task.taskName.toLowerCase().contains(searchQuery.toLowerCase());
@@ -209,8 +211,8 @@ class _HomePageState extends State<HomePage> {
                   final hour12 =
                       localDate.hour % 12 == 0 ? 12 : localDate.hour % 12;
                   final period = localDate.hour >= 12 ? "PM" : "AM";
-
-                  String? email = task.email ?? "By you";
+                  print (task.email ?? "null");
+                  String email = task.email ?? "By you";
 
                   final formatted =
                       "${localDate.year}-"
@@ -218,7 +220,8 @@ class _HomePageState extends State<HomePage> {
                       "${localDate.day.toString().padLeft(2, '0')}    "
                       "${hour12.toString().padLeft(2, '0')}:" // وقت
                       "${localDate.minute.toString().padLeft(2, '0')} $period"
-                      "\n${email == null ? "Made By you" : email}";
+                      "\n$email"
+                      "${task.shared == true ? "  Shared task" :"" }";
 
                   final color = taskColors[index % taskColors.length];
 
