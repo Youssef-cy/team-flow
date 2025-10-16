@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:task_team/TaskProvider.dart';
 import 'package:task_team/UserProvider.dart';
+import 'package:task_team/details.dart';
 import 'package:task_team/profile.dart';
 import 'package:provider/provider.dart';
 
@@ -192,7 +193,12 @@ class _HomePageState extends State<HomePage> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        setState(() {});
+                        setState(() {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Details()),
+                          );
+                        });
                       },
                       child: Icon(Icons.refresh, size: isTablet ? 28 : 22),
                     ),
@@ -208,10 +214,11 @@ class _HomePageState extends State<HomePage> {
 
                   final localDate = task.updatedAt!.toLocal();
 
-                  final hour12 =
-                      localDate.hour % 12 == 0 ? 12 : localDate.hour % 12;
+                  final hour12 = localDate.hour % 12 == 0
+                      ? 12
+                      : localDate.hour % 12;
                   final period = localDate.hour >= 12 ? "PM" : "AM";
-                  print (task.email ?? "null");
+                  print(task.email ?? "null");
                   String email = task.email ?? "By you";
 
                   final formatted =
@@ -221,7 +228,7 @@ class _HomePageState extends State<HomePage> {
                       "${hour12.toString().padLeft(2, '0')}:" // وقت
                       "${localDate.minute.toString().padLeft(2, '0')} $period"
                       "\n$email"
-                      "${task.shared == true ? "  Shared task" :"" }";
+                      "${task.shared == true ? "  Shared task" : ""}";
 
                   final color = taskColors[index % taskColors.length];
 
