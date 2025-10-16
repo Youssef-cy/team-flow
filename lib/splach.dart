@@ -57,7 +57,7 @@ class _SplachState extends State<Splach> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Navbar(wid: HomePage(),)),
+        MaterialPageRoute(builder: (context) => const Navbar(wid: HomePage())),
       );
     });
   }
@@ -66,10 +66,7 @@ class _SplachState extends State<Splach> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.only(left: 30.0),
-        child: Center(child: LottieBuilder.asset("assets/loading (1).json")),
-      ),
+      body: Center(child: LottieBuilder.asset("assets/loading (1).json")),
     );
   }
 }
