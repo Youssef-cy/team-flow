@@ -117,9 +117,14 @@ class _CalendarPageState extends State<CalendarPage> {
                 onPressed: _isLoading
                     ? null
                     : () async {
-                        if (taskController.text.trim().isNotEmpty) {
+                        if (taskController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("please enter task title ")),
+                          );
+                        }
+                        else {
                           setStateDialog(() {
-                            _isLoading = true; // 👈 دي بقى بتأثر على الDialog
+                            _isLoading = true;
                           });
 
                           try {
@@ -183,9 +188,7 @@ class _CalendarPageState extends State<CalendarPage> {
     final listOfAllTasks = [...taskProvider.sharedTasks, ...taskProvider.tasks];
     final List<Task> tasksToDisplay = selected == 0
         ? listOfAllTasks.where((t) => t.isCompleted == true).toList()
-        : listOfAllTasks
-              .where((task) => task.isCompleted == false)
-              .toList();
+        : listOfAllTasks.where((task) => task.isCompleted == false).toList();
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
@@ -324,10 +327,12 @@ class _CalendarPageState extends State<CalendarPage> {
                                                 : TextDecoration.none,
                                           ),
                                         ),
-                                        task.shared == true ? 
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 15),
-                                        child: Text(
+                                  task.shared == true
+                                      ? Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 15,
+                                          ),
+                                          child: Text(
                                             "Shared by ${task.email}",
                                             style: TextStyle(
                                               fontSize: isTablet ? 16 : 14,
@@ -337,8 +342,8 @@ class _CalendarPageState extends State<CalendarPage> {
                                                   : TextDecoration.none,
                                             ),
                                           ),
-                                      ) : 
-                                        SizedBox(),
+                                        )
+                                      : SizedBox(),
                                 ],
                               ),
                             ],

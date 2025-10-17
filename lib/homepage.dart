@@ -136,26 +136,36 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Icon(Icons.search, color: Colors.grey.shade500, size: 24),
                       const SizedBox(width: 10),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          textAlignVertical: TextAlignVertical.center,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.all(18),
-                            hintText: 'Search task..',
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 16,
-                            ),
-                            border: InputBorder.none,
+
+                      Container(
+                        width: 230,
+                        height: 70,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: 10.0,
+                            left: 10,
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              searchQuery = value;
-                            });
-                          },
+                          child: TextField(
+                            controller: _searchController,
+                            textAlignVertical: TextAlignVertical.center,
+                            decoration: const InputDecoration(
+                              // contentPadding: EdgeInsets.all(18),
+                              hintText: 'Search task..',
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                              border: InputBorder.none,
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                searchQuery = value;
+                              });
+                            },
+                          ),
                         ),
                       ),
+
                       Icon(Icons.tune, color: Colors.black, size: 24),
                     ],
                   ),
