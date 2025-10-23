@@ -52,15 +52,15 @@ class UserProvider with ChangeNotifier {
     try {
       final response = await supabase.storage
           .from("avatars")
-          .upload('users/${_user!.id}/${file.name}', File(file.path));
+          .upload('users/${_user!.id}/image', File(file.path));
       print("response ${response.toString()}");
       // Handle success (e.g., retrieve public URL)
       final String publicUrl = await supabase.storage
           .from("avatars")
           .createSignedUrl(
-            "users/${_user!.id}/${file.name}",
+            "users/${_user!.id}/image",
             10 * 365 * 24 * 60 * 60,
-          );
+          ); // abdaladarwesh63@gmail.com
       await supabase
           .from("profiles")
           .update({"profile_pic": publicUrl})

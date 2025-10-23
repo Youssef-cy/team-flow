@@ -237,8 +237,8 @@ class _HomePageState extends State<HomePage> {
                       "${localDate.day.toString().padLeft(2, '0')}    "
                       "${hour12.toString().padLeft(2, '0')}:" // وقت
                       "${localDate.minute.toString().padLeft(2, '0')} $period"
-                      "\n$email"
-                      "${task.shared == true ? "  Shared task" : ""}";
+                      "\nMade by $email"
+                      "${task.shared == true ? "  Shared tasks" : ""}";
 
                   final color = taskColors[index % taskColors.length];
 
@@ -251,6 +251,7 @@ class _HomePageState extends State<HomePage> {
                       footer: formatted,
                       isTablet: isTablet,
                       textScale: textScale,
+                      photoUrl: task.pics![0]
                     ),
                   );
                 }).toList(),
@@ -298,6 +299,7 @@ class _HomePageState extends State<HomePage> {
     required String footer,
     required bool isTablet,
     required double textScale,
+    String? photoUrl
   }) {
     return Container(
       width: double.infinity,
@@ -325,6 +327,7 @@ class _HomePageState extends State<HomePage> {
                 ),
           SizedBox(height: isTablet ? 16 : 12),
           Text(footer, style: const TextStyle(color: Colors.black54)),
+          photoUrl == null ? SizedBox() : Image.network(photoUrl)
         ],
       ),
     );

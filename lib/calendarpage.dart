@@ -333,7 +333,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                             top: 15,
                                           ),
                                           child: Text(
-                                            "Shared by ${task.email}",
+                                            "Shared by ${task.email == "Made By you" ? "You" : task.email}",
                                             style: TextStyle(
                                               fontSize: isTablet ? 16 : 14,
                                               color: Colors.blue,
