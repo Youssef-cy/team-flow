@@ -251,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                       footer: formatted,
                       isTablet: isTablet,
                       textScale: textScale,
-                      photoUrl: task.pics![0]
+                      photoUrl: task.pics == null ? null : task.pics![0]
                     ),
                   );
                 }).toList(),
