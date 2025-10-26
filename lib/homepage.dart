@@ -18,7 +18,6 @@ class _HomePageState extends State<HomePage> {
   String searchQuery = "";
   final TextEditingController _searchController = TextEditingController();
 
-  // ✅ ألوان مختلفة للتسكات
   final List<Color> taskColors = [
     Colors.orange,
     Colors.red,
@@ -34,16 +33,15 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
 
-      if (taskProvider.sharedTasks.isNotEmpty &&
-          taskProvider.tasks.isNotEmpty) {
-        setState(() => _isLoading = false);
-        return;
+      // تحميل المهام مع فحص الأمان
+      try {
+        await Future.wait([
+          taskProvider.FillTasks(),
+          taskProvider.AddingOrgaTasks(),
+        ]);
+      } catch (e) {
+        debugPrint("Error loading tasks: $e");
       }
-
-      await Future.wait([
-        taskProvider.FillTasks(),
-        taskProvider.AddingOrgaTasks(),
-      ]);
 
       if (mounted) setState(() => _isLoading = false);
     });
@@ -54,25 +52,22 @@ class _HomePageState extends State<HomePage> {
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
 
-    if (_isLoading == true || user == null) {
-      return const Center(child: CircularProgressIndicator());
+    if (_isLoading || user == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final taskprovider = Provider.of<TaskProvider>(context);
-    final List<Task> tasks = taskprovider.tasks;
+    final taskProvider = Provider.of<TaskProvider>(context);
+    final List<Task> tasks = taskProvider.tasks;
+    final List<Task> sharedTasks = taskProvider.sharedTasks;
+
+    final currentTasks = selected == 0 ? sharedTasks : tasks;
+    final filteredTasks = currentTasks.where((task) {
+      final taskName = task.taskName ?? "";
+      return taskName.toLowerCase().contains(searchQuery.toLowerCase());
+    }).toList();
 
     final size = MediaQuery.of(context).size;
     final isTablet = size.width > 600;
-
-    // 🧠 استخدم الليست الحالية
-    final currentTasks = selected == 0 ? taskprovider.sharedTasks : tasks;
-
-    print("selected $selected");
-
-    // 🔍 فلترة حسب السيرش
-    final filteredTasks = currentTasks.where((task) {
-      return task.taskName.toLowerCase().contains(searchQuery.toLowerCase());
-    }).toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -95,31 +90,30 @@ class _HomePageState extends State<HomePage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => Profile(
-                              name: user.name!,
-                              email: user.email,
+                              name: user.name ?? "User",
+                              email: user.email ?? "No email",
                               phone: '',
                             ),
                           ),
                         );
                       },
-                      child: Text("🔔", style: TextStyle(fontSize: 25)),
+                      child: const Text("🔔", style: TextStyle(fontSize: 25)),
                     ),
                   ],
                 ),
 
                 SizedBox(height: isTablet ? 40 : 25),
 
-                // 👋 Welcome user
-                Text("Hello ${user.name ?? ''}"),
-
-                // 📌 Title
+                Text(
+                  "Hello ${user.name ?? ''}",
+                  style: const TextStyle(fontSize: 18),
+                ),
                 Text(
                   "You Have\n${filteredTasks.length} Task Today",
                   style: TextStyle(
                     fontSize: (isTablet ? 30 : 28) * textScale,
                     fontWeight: FontWeight.bold,
                   ),
-                  textAlign: TextAlign.start,
                 ),
 
                 SizedBox(height: isTablet ? 30 : 20),
@@ -134,39 +128,20 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.search, color: Colors.grey.shade500, size: 24),
+                      Icon(Icons.search, color: Colors.grey.shade500),
                       const SizedBox(width: 10),
-
-                      Container(
-                        width: 230,
-                        height: 70,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: 10.0,
-                            left: 10,
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: const InputDecoration(
+                            hintText: 'Search task..',
+                            border: InputBorder.none,
                           ),
-                          child: TextField(
-                            controller: _searchController,
-                            textAlignVertical: TextAlignVertical.center,
-                            decoration: const InputDecoration(
-                              // contentPadding: EdgeInsets.all(18),
-                              hintText: 'Search task..',
-                              hintStyle: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 16,
-                              ),
-                              border: InputBorder.none,
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                searchQuery = value;
-                              });
-                            },
-                          ),
+                          onChanged: (value) =>
+                              setState(() => searchQuery = value),
                         ),
                       ),
-
-                      Icon(Icons.tune, color: Colors.black, size: 24),
+                      const Icon(Icons.tune, color: Colors.black),
                     ],
                   ),
                 ),
@@ -190,7 +165,6 @@ class _HomePageState extends State<HomePage> {
 
                 SizedBox(height: isTablet ? 35 : 25),
 
-                // ⏳ Pending Requests
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -203,12 +177,10 @@ class _HomePageState extends State<HomePage> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        setState(() {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => Details()),
-                          );
-                        });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Details()),
+                        );
                       },
                       child: Icon(Icons.refresh, size: isTablet ? 28 : 22),
                     ),
@@ -217,44 +189,41 @@ class _HomePageState extends State<HomePage> {
 
                 SizedBox(height: isTablet ? 25 : 15),
 
-                // 🗂️ Cards
-                ...filteredTasks.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final task = entry.value;
-
-                  final localDate = task.updatedAt!.toLocal();
-
-                  final hour12 = localDate.hour % 12 == 0
-                      ? 12
-                      : localDate.hour % 12;
-                  final period = localDate.hour >= 12 ? "PM" : "AM";
-                  print(task.email ?? "null");
-                  String email = task.email ?? "By you";
-
-                  final formatted =
-                      "${localDate.year}-"
-                      "${localDate.month.toString().padLeft(2, '0')}-"
-                      "${localDate.day.toString().padLeft(2, '0')}    "
-                      "${hour12.toString().padLeft(2, '0')}:" // وقت
-                      "${localDate.minute.toString().padLeft(2, '0')} $period"
-                      "\nMade by $email"
-                      "${task.shared == true ? "  Shared tasks" : ""}";
-
-                  final color = taskColors[index % taskColors.length];
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 15),
-                    child: _buildCard(
-                      color: color,
-                      title: task.taskName,
-                      subtitle: task.subTask ?? "",
-                      footer: formatted,
-                      isTablet: isTablet,
-                      textScale: textScale,
-                      photoUrl: task.pics![0]
+                // 🗂️ Task cards
+                if (filteredTasks.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 30),
+                      child: Text(
+                        "No tasks found",
+                        style: TextStyle(color: Colors.black54),
+                      ),
                     ),
-                  );
-                }).toList(),
+                  )
+                else
+                  ...filteredTasks.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final task = entry.value;
+                    final color = taskColors[index % taskColors.length];
+                    final localDate = (task.updatedAt ?? DateTime.now())
+                        .toLocal();
+                    final dateText =
+                        "${localDate.day} ${_monthName(localDate.month)}";
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: _buildCard(
+                        color: color,
+                        title: task.taskName ?? "Untitled",
+                        subtitle: task.subTask ?? "",
+                        progress: 0.35,
+                        date: dateText,
+                        isTablet: isTablet,
+                        textScale: textScale,
+                        pics: task.pics ?? [],
+                      ),
+                    );
+                  }).toList(),
               ],
             ),
           );
@@ -263,14 +232,28 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  String _monthName(int month) {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return months[month - 1];
+  }
+
   Widget _buildTab(String label, int index, bool isTablet) {
     return Expanded(
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            selected = index;
-          });
-        },
+        onTap: () => setState(() => selected = index),
         child: Container(
           padding: EdgeInsets.symmetric(vertical: isTablet ? 16 : 12),
           decoration: BoxDecoration(
@@ -292,42 +275,133 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // ✅ تصميم الكارت بنفس الشكل اللي في الصورة
   Widget _buildCard({
     required Color color,
     required String title,
     required String subtitle,
-    required String footer,
+    required double progress,
+    required String date,
     required bool isTablet,
     required double textScale,
-    String? photoUrl
+    required List<String> pics,
   }) {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 24 : 18),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withOpacity(0.95),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: (isTablet ? 20 : 16) * textScale,
+          // الجزء العلوي (نفس لون الكارت)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: (isTablet ? 20 : 16) * textScale,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: (isTablet ? 14 : 12) * textScale,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                LinearProgressIndicator(
+                  value: progress,
+                  color: Colors.white,
+                  backgroundColor: Colors.white24,
+                  minHeight: 5,
+                ),
+                const SizedBox(height: 6),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    "${(progress * 100).round()}%",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: isTablet ? 10 : 8),
-          subtitle == ""
-              ? const SizedBox()
-              : Text(
-                  subtitle,
-                  style: TextStyle(fontSize: (isTablet ? 16 : 14) * textScale),
+
+          // الجزء الأبيض السفلي (زي الصورة)
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(20),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-          SizedBox(height: isTablet ? 16 : 12),
-          Text(footer, style: const TextStyle(color: Colors.black54)),
-          photoUrl == null ? SizedBox() : Image.network(photoUrl)
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Text(
+                      "Issued to:",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (pics.isNotEmpty)
+                      CircleAvatar(
+                        radius: 15,
+                        backgroundImage: NetworkImage(pics.first),
+                      )
+                    else
+                      const CircleAvatar(
+                        radius: 15,
+                        backgroundColor: Colors.grey,
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      "Date",
+                      style: TextStyle(color: Colors.black54, fontSize: 12),
+                    ),
+                    Text(
+                      date,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
